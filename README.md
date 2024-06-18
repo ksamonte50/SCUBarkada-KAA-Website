@@ -1,1 +1,1 @@
-# SCUBarkada--KAA-Website
+# Barkada of SCU's Official KAA Website
