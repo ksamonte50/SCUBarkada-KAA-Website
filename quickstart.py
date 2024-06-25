@@ -6,23 +6,30 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# If modifying these scopes, delete the file token.json.
+# IF MODIFYING THESE SCOPES, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/spreadsheets"]
+spreadsheet_ID = "1VidXQeKAelgcGtEf7bkFqQX7VB82ATwCX8ok4mcIqpM"
+
 
 def main():
-  """Shows basic usage of the Sheets API.
-  Prints values from a sample spreadsheet.
-  """
+  # actual code
+  text = getData(spreadsheet_ID, "A11:B11")
+  print(text)
+
+# gets data of one cell
+# Precondition: 
+# Postcondition: returns an array of strings.
+def getData(id, sheetsRange):
+  # Give Google API the credentials
   creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
+  # token.json file is created if not already in directiroy
   if os.path.exists("token.json"):
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
   # If there are no (valid) credentials available, let the user log in.
   if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
+      creds.refresh(Request()) # opens the google sign in page
     else:
       flow = InstalledAppFlow.from_client_secrets_file(
           "credentials.json", SCOPES
@@ -32,26 +39,35 @@ def main():
     with open("token.json", "w") as token:
       token.write(creds.to_json())
 
+  # actual code
   try:
     service = build("sheets", "v4", credentials=creds)
-
     # Call the Sheets API
     sheet = service.spreadsheets()
     result = (
         sheet.values()
-        .get(spreadsheetId = "1VidXQeKAelgcGtEf7bkFqQX7VB82ATwCX8ok4mcIqpM", range = "A1:A3")
+        .get(spreadsheetId=id,range=sheetsRange)
         .execute()
     )
-    print("Hello")
     values = result.get("values", [])
 
     if not values:
       print("No data found.")
       return
-    print(values[0][0]);
+    
+    return splitLittles(values[0][0]) # this is WIERD! will be fixed later
+  
   except HttpError as err:
       print(f"An error occured: {err}")
+      return
 
+# This function splits the littles into separate strings.
+def splitLittles(input):
+  arr = input.split(",")
+  newArr = []
+  for elt in arr:
+    newArr.append(elt.strip())
+  return newArr
 
 if __name__ == "__main__":
   main()
