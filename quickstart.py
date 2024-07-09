@@ -13,8 +13,9 @@ spreadsheet_ID = "1VidXQeKAelgcGtEf7bkFqQX7VB82ATwCX8ok4mcIqpM"
 
 def main():
   # actual code
-  text = getData(spreadsheet_ID, "A11:B11")
-  print(text)
+  text = getData(spreadsheet_ID, "B10:B10")
+  littles = splitLittles(text[0][0])
+  print(littles)
 
 # gets data of one cell
 # Precondition: 
@@ -27,17 +28,17 @@ def getData(id, sheetsRange):
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
 
   # If there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request()) # opens the google sign in page
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-          "credentials.json", SCOPES
-      )
-      creds = flow.run_local_server(port=0)
-    # Save the credentials for the next run
-    with open("token.json", "w") as token:
-      token.write(creds.to_json())
+  # if not creds or not creds.valid:
+  #   if creds and creds.expired and creds.refresh_token:
+  #     creds.refresh(Request()) #opens the google sign in page
+  #   else:
+  #     flow = InstalledAppFlow.from_client_secrets_file(
+  #         "credentials.json", SCOPES
+  #     )
+  #     creds = flow.run_local_server(port=0)
+  #   # Save the credentials for the next run
+  #   with open("token.json", "w") as token:
+  #     token.write(creds.to_json())
 
   # actual code
   try:
@@ -55,7 +56,8 @@ def getData(id, sheetsRange):
       print("No data found.")
       return
     
-    return splitLittles(values[0][0]) # this is WIERD! will be fixed later
+    #return splitLittles(values[0][0]) # this is WIERD! will be fixed later
+    return values
   
   except HttpError as err:
       print(f"An error occured: {err}")
