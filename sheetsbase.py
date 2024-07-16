@@ -27,6 +27,8 @@ def getSheet():
 
 def createNewToken():
 # If there are no (valid) credentials available, let the user log in.
+  global creds
+  creds = None
   if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
       creds.refresh(Request()) # opens the google sign in page

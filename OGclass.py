@@ -72,39 +72,64 @@ def binarySearch(values, lo, hi, target):
        return -3 # nada
 
 class Tree:
-  def __init__(self, input):
-    self.root = input
-    self.check = []
-    self.dict = {}
-  def helpFunction(self):
-    makeTree(self.check, self.dict, self.root)
-  
+    def __init__(self, inputName):
+      self.check = []
+      self.root = Person(inputName,[], [])
 
-def makeTree(arr, newTree, input):
-  arr.append(input)
-  print("findFam: " + input)
-  if input == None or input == []:
-     return 
-  newTree[input] = {}
-  newTree[input]["row"] = searchName(input) + 2
-  newTree[input]["bigs"] = splitComma(sheetsbase.getData(spreadsheet_ID, "C" + str(newTree[input]["row"])))
-  newTree[input]["littles"] = splitComma(sheetsbase.getData(spreadsheet_ID, "B" + str(newTree[input]["row"])))
-  for bigName in newTree[input]["bigs"]:
-    if(bigName not in arr):
-      makeTree(arr, newTree, bigName)
-  for lilName in newTree[input]["littles"]:
-    if(lilName not in arr):
-      makeTree(arr, newTree, lilName)
+class Person:
+    def __init__(self, name, bigs, littles):
+        self.name = name
+        # self.flag = False
+        self.row = searchName(name) + 2 # add 2 to row number because we removed "Person" and array index starts counting from 0.
+        self.bigs = []
+        self.littles = []
+        # temp = sheetsbase.getData(spreadsheet_ID, "C" + str(self.row))
+        # if temp == None:
+        #   self.bigs = []
+        # else:
+        #   self.bigs = splitComma(temp[0][0]) # [big1, big2] 
+        #   # self.bigs = [Person(big1), Person(big2)]
+        
+        # temp = sheetsbase.getData(spreadsheet_ID, "B" + str(self.row))
+        # if temp == None:
+        #   self.littles = []
+        # else:
+        #   self.littles = splitComma(temp[0][0]) # [big1, big2]
+        #   # self.famname = ""
 
-  
+    def findFam(self, arr):
+      arr.append(self.name) 		#  use this array to check who has been processed 
+      
+      print("findFam: " + self.name)
+      temp = sheetsbase.getData(spreadsheet_ID, "C" + str(self.row))
+      print("bigs: " + str(temp))
+      temp = splitComma(temp)
+      for bigName in temp:
+        if(bigName not in arr):		# check if name has been processed
+          # if not, create an object for them while passing in your name
+          self.bigs.append( Person(bigName, [], [self]) )
+          self.bigs[-1].findFam(arr) # recursive call. Operates on the created person
 
+      temp2 = sheetsbase.getData(spreadsheet_ID, "B" + str(self.row))
+      print("littles: " + str(temp2))
+      temp2 = splitComma(temp2)
+      for lilName in temp2:
+        print("lilName: " + lilName)
+        print(arr)
+        if(lilName not in arr):		# check if name has been processedo
+          newPerson = Person(lilName, [self], [])
+          self.littles.append(newPerson)
+          newPerson.findFam(arr) # recursive call. Operates on the created person	
+      return
 
+    def getBigs(self):
+        return self.bigs
 
 if __name__ == "__main__":
    main()
 
 # test code :)
 tree = Tree("Joshua Sixto Beltran")
+tree.root.findFam(tree.check)
 
-tree.helpFunction()
-print(tree.dict)
+print(tree.root.bigs[0].name)
