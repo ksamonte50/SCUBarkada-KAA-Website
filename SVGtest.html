@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale = 1" />
+		<title>big test gamers</title>
+		<link rel="stylesheet" href="https://pyscript.net/releases/2024.7.1/core.css">
+		<link rel="stylesheet" href= "./tree.css">
+      	<script type="module" src="https://pyscript.net/releases/2024.7.1/core.js"></script>
+	</head>
+	<body>
+		<p>Hey there this is a P</p>
+		<div style = "max-width: 700px; max-height: 300px; border: 1px red solid; margin: auto; " >
+			<svg style = "border: 1px black solid"  id = "svg-drawing" preserveAspectRatio = "xMidYMid meet" viewBox = "0 0 700 300">
+				<circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+			</svg>
+		</div>
+		<script type="mpy">
+			from pyscript import window, document
+
+			newElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			newElement.setAttribute('fill', 'orange');
+			newElement.setAttribute('x', "calc(50% - 50px)")
+			newElement.setAttribute('y', "calc(50% - 50px)")
+			newElement.setAttribute('rx', "20")
+			newElement.setAttribute('ry', "20")
+			newElement.setAttribute('width','100px');
+			newElement.setAttribute('height','100px');
+			document.getElementById('svg-drawing').appendChild(newElement);
+			
+			holder = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject'); 
+			holder.setAttribute('x', "calc(50% - 50px)")
+			holder.setAttribute('y', "calc(50% - 50px)")
+			holder.setAttribute('width', '100px')
+			holder.setAttribute('height', '100px')
+			# holder.setAttribute('style','border: 1px solid blue')
+			document.getElementById('svg-drawing').appendChild(holder);
+
+			newTextContent = document.createElement('DIV');
+			newTextContent.innerHTML = "Gabriel Lorenzo Paraiso"
+			newTextContent.setAttribute("style", " \
+				display: table-cell; \
+				vertical-align: middle; \
+				font-size:18px; \
+			")
+
+			newTextContainer = document.createElement('DIV');
+			newTextContainer.setAttribute("style", "\
+				display: table; \
+				width: 100px; \
+				height: 100px; \
+				text-align: center; \
+			")
+
+			newTextContainer.appendChild(newTextContent)
+			holder.appendChild(newTextContainer)
+		</script>
+		<!-- <script type = "text/javascript">
+			const frameWidth = 700
+			const frameHeight = 300
+			const nodeLength = 100
+			let newElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			newElement.setAttribute('fill', 'orange');
+			// newElement.setAttribute('x', "calc(350px)")
+			// newElement.setAttribute('y', "calc(150px)")
+				newElement.setAttribute('x', "calc(" + (frameWidth / 2) + "px - " + (nodeLength / 2) + "px)")
+				newElement.setAttribute('y', "calc(" + (frameHeight / 2) + "px - " + (nodeLength / 2) + "px)")
+			newElement.setAttribute('width','100px');
+			newElement.setAttribute('height','100px');
+				// newElement.setAttribute('class', '0');
+			document.getElementById('svg-drawing').appendChild(newElement);
+			
+			let holder = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject'); 
+			holder.setAttribute('x', "calc(50% - 50px)")
+			holder.setAttribute('y', "calc(50% - 50px)")
+			holder.setAttribute('width', '100px')
+			holder.setAttribute('height', '100px')
+			holder.setAttribute('style','border: 1px solid blue')
+
+
+			let newText = document.createElement('DIV');
+			newText.innerHTML = "Hello My name is Elliot"
+			newText.setAttribute('font-size','30px');
+				// console.log(document.getElementsByClassName("0"));
+			holder.appendChild(newText);
+			document.getElementById('svg-drawing').appendChild(holder);
+		</script> -->
+	</body>
+</html>
