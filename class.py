@@ -10,19 +10,18 @@ from googleapiclient.errors import HttpError
 SCOPES = ["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/spreadsheets"]
 spreadsheet_ID = "1VidXQeKAelgcGtEf7bkFqQX7VB82ATwCX8ok4mcIqpM"
 
-# no need to redo code :)
 def main():
-  sheetsbase.main()
+  sheetsbase.main() # creates connection to google sheets.
   result = (
       sheetsbase.getSheet().values()
       .get(spreadsheetId=spreadsheet_ID,range="A:A")
       .execute()
   )
-  global names
+  global names # variable for storing all names in an array
   names = result.get("values", [])
   names.pop(0) # or we can just not include "Person" in the range
 
-# This function splits names into separate strings.
+# function that splits the names gathered from database into separate strings.
 def splitComma(input): 
   if input == None or input == []:
      return []
@@ -34,21 +33,16 @@ def splitComma(input):
     newArr.append(elt.strip())
   return newArr
 
-# return the row number of the name
+# function that returns the row number of the name
 def searchName(name):
     global names
-    global counter
-    counter = 0
     name.strip()
     out = binarySearch(names, 0, len(names) - 1, name)
-    return out      
+    return out
+      
 # binary search!
 def binarySearch(values, lo, hi, target):
     if hi >= lo:
-      global counter
-      counter = counter + 1
-      if counter > 20:
-        exit()
       mid = (hi + lo) // 2
       # print("mid: " + str(mid) + " and its " + values[mid][0])
       # print("target: " + target)
@@ -73,38 +67,43 @@ def binarySearch(values, lo, hi, target):
 
 class Tree:
   def __init__(self, input):
-    self.root = input
-    self.check = []
-    self.dict = {}
-  def helpFunction(self):
-    makeTree(self.check, self.dict, self.root)
+    self.root = input # name of person we want to build tree for
+    self.check = [] # array used for checking who we have processed already
+    self.dict = {} # used to store all of the data
   
+  # recursive function to build the dictionary with all of our nodes
+  def makeTree(self, input):
+    self.check.append(input)
+    print("findFam: " + input)
+    if input == None or input == []: # base case to stop recursion
+      return
+    # process data for (input)
+    self.dict[input] = {}
+    self.dict[input]["row"] = searchName(input) + 2
+    self.dict[input]["bigs"] = splitComma(sheetsbase.getData(spreadsheet_ID, "C" + str(self.dict[input]["row"])))
+    self.dict[input]["littles"] = splitComma(sheetsbase.getData(spreadsheet_ID, "B" + str(self.dict[input]["row"])))
+    # if (input)'s bigs or littles have not been processed yet, process them.
+    for bigName in self.dict[input]["bigs"]:
+      if(bigName not in self.dict):
+        self.makeTree(bigName)
+    for lilName in self.dict[input]["littles"]:
+      if(lilName not in self.dict):
+        self.makeTree(lilName)
 
-def makeTree(arr, newTree, input):
-  arr.append(input)
-  print("findFam: " + input)
-  if input == None or input == []:
-     return 
-  newTree[input] = {}
-  newTree[input]["row"] = searchName(input) + 2
-  newTree[input]["bigs"] = splitComma(sheetsbase.getData(spreadsheet_ID, "C" + str(newTree[input]["row"])))
-  newTree[input]["littles"] = splitComma(sheetsbase.getData(spreadsheet_ID, "B" + str(newTree[input]["row"])))
-  for bigName in newTree[input]["bigs"]:
-    if(bigName not in arr):
-      makeTree(arr, newTree, bigName)
-  for lilName in newTree[input]["littles"]:
-    if(lilName not in arr):
-      makeTree(arr, newTree, lilName)
+  # function to print all elements in the tree
+  def printTree(self):
+      for person in self.dict:
+          print(person)
+          print("  row#: " + str(self.dict[person]["row"]))
+          print("  bigs: " + str(self.dict[person]["bigs"]))
+          print("  lils: " + str(self.dict[person]["littles"]))
 
-  
-
-
-
+# calls main function
 if __name__ == "__main__":
    main()
 
 # test code :)
 tree = Tree("Joshua Sixto Beltran")
+tree.makeTree(tree.root)
 
-tree.helpFunction()
-print(tree.dict)
+tree.printTree()

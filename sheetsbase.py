@@ -10,15 +10,17 @@ SCOPES = ["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.
 
 def main():
   # Give Google API the credentials
+  global creds
   creds = None
   # token.json file is created if not already in directiroy
   if os.path.exists("token.json"):
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-  else: createNewToken()
-  service = build("sheets", "v4", credentials=creds)
+  else: 
+    createNewToken()
+  # service = build("sheets", "v4", credentials=creds)
   # Call the Sheets API
   global sheet
-  sheet = service.spreadsheets()
+  sheet = build("sheets", "v4", credentials=creds).spreadsheets()
 
 # returns the sheet variable for interacting with the google sheet
 def getSheet():
@@ -28,7 +30,6 @@ def getSheet():
 def createNewToken():
 # If there are no (valid) credentials available, let the user log in.
   global creds
-  creds = None
   if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
       creds.refresh(Request()) # opens the google sign in page
@@ -54,15 +55,13 @@ def getData(id, sheetsRange):
         .execute()
     )
     values = result.get("values", [])
-
     if not values:
-      print("sheetsbase.getData: No data found.")
-      return
-  
-    return values # returns a 2D array!!! if you request a single cell, do values[0] for the array!
+      # print("sheetsbase.getData: No data found.")
+      return 
+    return values # returns a 2D array!!! if you request a single cell, do values[0][0] for the string!
   
   except HttpError as err:
-      print(f"An error occured: {err}")
+      print(f"sheetsbase.getData: An error occured: {err}")
       return
 
 if __name__ == "__main__":
