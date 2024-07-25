@@ -68,12 +68,10 @@ def binarySearch(values, lo, hi, target):
 class Tree:
   def __init__(self, input):
     self.root = input # name of person we want to build tree for
-    self.check = [] # array used for checking who we have processed already
     self.dict = {} # used to store all of the data
   
   # recursive function to build the dictionary with all of our nodes
   def makeTree(self, input):
-    self.check.append(input)
     print("findFam: " + input)
     if input == None or input == []: # base case to stop recursion
       return
