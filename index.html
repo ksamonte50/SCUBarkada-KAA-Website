@@ -1,0 +1,25 @@
+<!-- With this setup, the code calls the api and the treeclass.makeTree() function -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale = 1" />
+		<title>Tree Test</title>
+		<link rel="stylesheet" href="https://pyscript.net/releases/2024.7.1/core.css">
+      	<script type="module" src="https://pyscript.net/releases/2024.7.1/core.js"></script>
+
+	</head>
+	<body>
+		<p id = "demo">This P contains info. maybe.</p>
+		<button type="button" id="testButton" style="visibility: hidden">Click!</button>
+		<div id = "svg-container" style = "max-width: 700px; border: 1px red solid; margin: auto; " >
+			<svg style = "border: 1px black solid"  id = "svg-drawing">
+				<circle cx="0" cy= "0" r="40" stroke="green" stroke-width="2" fill="green" />'
+			</svg>
+		</div>
+		<!-- <script type = "mpy" src = "draw.py"></script> -->
+		<!-- <script type="py" src="testPyscript.py" config="pyscript.json"> </script> -->
+		<script type="mpy" src="treeclass.py" config="pyscript.json" async></script>
+		<script type = "text/javascript" src="zoom.js"></script>
+	</body>
+</html>
