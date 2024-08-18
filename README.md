@@ -1,4 +1,5 @@
 # Barkada of SCU's Official KAA Website
+## Back-end architecture
 This part of the website is the code for the Cloud Run serverless thing
 - Our Cloud Run image runs using Flask and gunicorn.
 - Using Docker, it creates an image that Cloud Run uses to respond to HTTP requests.
