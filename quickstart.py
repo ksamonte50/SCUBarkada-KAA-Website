@@ -7,8 +7,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # IF MODIFYING THESE SCOPES, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/spreadsheets"]
-spreadsheet_ID = "1VidXQeKAelgcGtEf7bkFqQX7VB82ATwCX8ok4mcIqpM"
+SCOPES = 'INSERT_HERE'
+spreadsheet_ID = 'INSERT_HERE'
 
 
 def main():
