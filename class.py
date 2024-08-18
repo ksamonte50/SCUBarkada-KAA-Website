@@ -7,8 +7,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-SCOPES = ["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/spreadsheets"]
-spreadsheet_ID = "1VidXQeKAelgcGtEf7bkFqQX7VB82ATwCX8ok4mcIqpM"
+SCOPES = 'INSERT_HERE'
+spreadsheet_ID = 'INSERT_HERE'
 
 def main():
   sheetsbase.main() # creates connection to google sheets.
@@ -101,7 +101,7 @@ if __name__ == "__main__":
    main()
 
 # test code :)
-tree = Tree("Joshua Sixto Beltran")
+tree = Tree('INSERT_HERE')
 tree.makeTree(tree.root)
 
 tree.printTree()
