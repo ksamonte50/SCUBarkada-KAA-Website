@@ -11,15 +11,29 @@
 	</head>
 	<body>
 		<p id = "demo">This P contains info. maybe.</p>
+		<input type = "text" id="tree_name" placeholder="Type a name here..."></input>
 		<button type="button" id="testButton" style="visibility: hidden">Click!</button>
-		<div id = "svg-container" style = "max-width: 700px; border: 1px red solid; margin: auto; " >
+		<div id = "svg-container" style = "max-width: 2000px; border: 1px red solid; margin: auto; " >
 			<svg style = "border: 1px black solid"  id = "svg-drawing">
-				<circle cx="0" cy= "0" r="40" stroke="green" stroke-width="2" fill="green" />'
+				<defs>
+					<filter id="shadow" width="125" height="125">
+						<feDropShadow dx="0" dy="4" stdDeviation="2.5"/>
+					</filter>
+				</defs>
+				<circle cx="0" cy= "0" r="40" stroke="green" stroke-width="2" fill="green" filter="url(#shadow)"/>'
 			</svg>
 		</div>
-		<!-- <script type = "mpy" src = "draw.py"></script> -->
-		<!-- <script type="py" src="testPyscript.py" config="pyscript.json"> </script> -->
-		<script type="mpy" src="treeclass.py" config="pyscript.json" async></script>
+		<mpy-config>
+			{
+				"files": {
+					"app.py": "",
+					"draw.py": "",
+					"animation.py": "",
+					"svgnodes.py": ""
+				}
+			}
+		</mpy-config>
+		<script type="mpy" src="treeclass.py" async></script>
 		<script type = "text/javascript" src="zoom.js"></script>
 	</body>
 </html>

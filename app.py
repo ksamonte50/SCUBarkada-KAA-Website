@@ -1,5 +1,5 @@
 # This file gets the data from the backend
-from pyscript import fetch, document
+from pyscript import fetch, document, window
 import asyncio
 import json
 
@@ -53,4 +53,7 @@ async def main():
 	return
 
 # necessary to run async code on browser.
-asyncio.create_task(main())
+def getData(event):
+	asyncio.create_task(main())
+
+window.addEventListener("py:all-done", getData)

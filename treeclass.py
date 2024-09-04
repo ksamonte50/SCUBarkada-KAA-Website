@@ -1,9 +1,12 @@
 # This code makes the edge list used for drawing the tree.
 import app
-from pyscript import when
+from draw import draw_full_tree
+from svgnodes import removeNodes
+from animation import resetAnimations
+from pyscript import when, document
 
 # app.data is originally set to None
-#   app module runs asynchronously, and the #testButton will become visible when
+#   app.py module runs asynchronously, and the #testButton will become visible when
 #   data is loaded, so no need to worry about app.data = NONE unless server shuts down
 
 # Function that splits the names gathered from database into separate strings.
@@ -43,14 +46,20 @@ def binarySearch(values, lo, hi, target):
 # using class for when we need more than one tree
 class Tree:
   def __init__(self, input):
-    self.root = input # name of person we want to build tree for
-    self.dict = {} # used to store the edge list
+    self.in_tree = False
+    for row in app.data:
+       if(row[0].lower() == input.lower()):
+          self.in_tree = True
+          break
+    if(self.in_tree):
+      self.root = input # name of person we want to build tree for
+      self.dict = {} # used to store the edge list
+    return
+    
   
   # recursive function to build the dictionary with all necessary nodes
   def makeTree(self, input):
     print(f"treeclass: finding fam of {input}")
-    if input == "" or input == None: # base case to stop recursion
-      return
 
     # process data for (input)
     row = searchNameForIndex(input)
@@ -60,6 +69,15 @@ class Tree:
     print(f"  row: {row}")
     self.dict[input] = {}
     self.dict[input]["row"] = row
+    self.dict[input]["x"] = 0
+    self.dict[input]["y"] = 0
+    self.dict[input]["visited"] = False
+    self.dict[input]["parent_ghost_nodes"] = []
+    self.dict[input]["child_ghost_nodes"] = []
+    self.dict[input]["top_big"] = False
+    self.dict[input]["my_node"] = None
+    # self.dict[input]["parentGhostNodes"] = []
+    # self.dict[input]["childGhostNodes"] = []
     # set bigs array
     if(len(app.data[row]) < 3):
       self.dict[input]["bigs"] = []
@@ -92,10 +110,16 @@ class Tree:
 @when("click", "#testButton")
 def testTree():
   print("Button Pushed.")
+  main_root = document.getElementById("tree_name").value
   if(app.data == None):
     print(f"Data not recieved yet. Aborting...")
     return
-  tree = Tree("INSERT_HERE") # tests code. output found in console
+  tree = Tree(main_root) # tests code. output found in console
+  if(not tree.in_tree):
+     print("Person is not in tree.")
+     return
   tree.makeTree(tree.root)
-  tree.printTree()
+  resetAnimations()
+  removeNodes()
+  draw_full_tree(tree.dict, main_root)
   return

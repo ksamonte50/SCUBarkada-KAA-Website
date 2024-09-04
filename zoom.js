@@ -1,24 +1,17 @@
-/** Zoom functionality for the svg.
-* code came from this stack overflow post: https://stackoverflow.com/questions/52576376/how-to-zoom-in-on-a-complex-svg-structure
-* look for sonntam / Access-Denied 's answer
-* thank you so much!
-*/
-
-// svg-drawing is an svg element
+// svg-drawing is an svg
+const container = document.getElementById("svg-container");
 const drawing = document.getElementById("svg-drawing");
 
 // CHANGE THESE VALUES IF YOU CHANGE THE (container) SIZE
 var defaultWidth = 700;
 var defaultHeight = 700;
 
-// getBoundingClientRect() gives distance from edges of the window.
-var drawingPosition = drawing.getBoundingClientRect();  
+var drawingPosition = drawing.getBoundingClientRect(); // getBoundingClientRect() gives distance from edges of the window. 
 
-// used for recording the size of the viewBox of the svg
 var viewBox = {x: 0, y: 0, width: defaultWidth, height: defaultHeight};
 
-// variables used for zooming/moving the svg
 var scale = 1;
+// movement variables
 var isPanning = false;
 var startPoint = {x: 0, y: 0};
 var endPoint = {x: 0, y: 0};
@@ -28,7 +21,7 @@ document.body.onload = function() {
 }
 
 // this function updates the position and size of the svg, since it can be resized and repositioned.
-var updateSize = function() {
+var checkSize = function() {
 	defaultWidth = drawing.clientWidth;
 	defaultHeight = drawing.clientHeight;
 	
@@ -37,11 +30,10 @@ var updateSize = function() {
 };
 
 // ---------- scroll zoom in/out (wheel behavior) ----------
-
 drawing.onwheel = function(e) {
-	updateSize();
+	checkSize();
+	e.preventDefault(); // prevents the scrolling behavior of mousewheel
 	if(!isPanning) {
-		e.preventDefault(); // prevents the scrolling behavior of mousewheel
 		let mouseX = e.x - drawingPosition.left;
 		let mouseY = e.y - drawingPosition.top;
 
@@ -66,7 +58,8 @@ drawing.onwheel = function(e) {
 // ----------- moving the svg (mouse down/up/move/leave behavior) ------------
 
 drawing.onmousedown = function(e) {
-	updateSize();
+	checkSize();
+	e.preventDefault();
 	isPanning = true;
 	startPoint = {x: e.x, y: e.y};
 }
