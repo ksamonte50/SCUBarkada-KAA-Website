@@ -1,15 +1,20 @@
 # This has the logic for animating the nodes when hovered over.
 
-from svgnodes import NODE_HEIGHT, NODE_WIDTH
-from draw import main_root, MAX_QUEUE_SIZE
+from svgnodes import NODE_HEIGHT, NODE_WIDTH, STROKE_WIDTH
+from draw import main_root, MAX_QUEUE_SIZE, GHOST_RECT_OPACITY
 from collections import deque
 from pyscript import document
 
 # TODO simple lines!
+# TODO case with 3 or more bigs for ghost parents and top_big
+
+
 # TODO Elliot case: not necessary i think but it will look a lot nicer on tree. it is an edge case tho so maybe we wont run into it too much
 
 # Constants
 MAX_QUEUE_SIZE = 100
+REAL_LINE_CONNECT_COLOR = "red"
+ANIMATED_GHOST_RECT_OPACITY = 0.9
 
 # Global variables to be used for animations.
 info_box = None
@@ -67,22 +72,19 @@ def update_box(text, x, y):
 # 		e {Event Object} - HTML DOM object that we don't need to use W
 def real_mouseover_event(e, tree, person):
 	resetAnimations()
-	# update_box(f"Find {person}?", tree[person]["x"], tree[person]["y"])
-	# animateAllMyNodes(tree, person)
 	animateNode(tree[person]["my_node"], tree[person]["y"])
-	# animateLines(tree[person]["lines"])
+	animateLines(tree[person]["lines"])
 	animateAllOtherNodes(tree, person, animated, "", main_root)
 
 # NOTE 	For ghost mouseover, current behavior requires that person
 # 		also be animated as it gets us closer to the root node.
 def ghost_mouseover_event(e, tree, person, ghost_dict):
-	resetAnimations()
-	# update_box(f"Find {ghost_dict["name"]}?", ghost_dict["x"], ghost_dict["y"])
-	
-	animateNode(ghost_dict["my_node"], ghost_dict["y"])
+	resetAnimations()	
+	animateNode(ghost_dict["my_node"], ghost_dict["y"], ghost=True)
 	if(ghost_dict["name"] in tree and tree[ghost_dict["name"]]["visited"] == True):
 		animateNode(tree[ghost_dict["name"]]["my_node"], tree[ghost_dict["name"]]["y"])
-		# animateAllOtherNodes(tree, ghost_dict["name"], animated, "", main_root)
+	animateLines(ghost_dict["lines"])
+	animateLines(tree[person]["lines"])
 	animateNode(tree[person]["my_node"], tree[person]["y"])
 	animateAllOtherNodes(tree, person, animated, "", main_root)
 
@@ -105,37 +107,35 @@ def addAnimation(elem, OG_y):
 	animation.beginElement()
 	return animation
 
-def addLineAnimation(line, y1, y2):
-	y = y1
-	if(y2 < y1):
-		y = y2
-	animation = document.createElementNS('http://www.w3.org/2000/svg', 'animate'); 
-	animation.setAttribute('attributeName', "y")
-	animation.setAttribute('dur', "0.05s")
-	animation.setAttribute('from', f"{y}")
-	animation.setAttribute('to', f'{y - ANIMATION_OFFSET}')
-	animation.setAttribute('fill', 'freeze')
-	line.appendChild(animation)
-
-	animation.beginElement()
-	return animation
+# Animates the line
+# The "animation" is just changing the color of the line
+# Parameters:
+#		line {SVG Element} - line we want to animate
+#		color {String} - the new color we want to give the line
+#		horizontal {[] | [x1, x2]} - list of x1 and x2 if line is horizontal, nothing if vertical
+def addLineAnimation(line, color, horizontal):
+	if(len(horizontal) == 2):
+		line.setAttribute('x1', f'{horizontal[0] - STROKE_WIDTH/2}')
+		line.setAttribute('x2', f'{horizontal[1] + STROKE_WIDTH/2}')
+	line.setAttribute('style', f'stroke: {color}; stroke-width: {STROKE_WIDTH*2};')
 
 # Gives animations and shadows to given node.
 # Paramenters
 #		node {HTML Object list} - node we want to animate
 #		y {Number} - Y of given node.
-def animateNode(node, y):
+def animateNode(node, y, ghost=False):
 	animation = addAnimation(node[0], y)
 	animated.append([node[0], animation])
-	addShadow(node[0])
+	addShadow(node[0], ghost)
 	animation = addAnimation(node[1], y)
 	animated.append([node[1], animation])
 
+# Animates each line in the line list
+# The (animated) queue is used for resetting the animations
 def animateLines(line_list):
 	for line in line_list:
-		animation = addLineAnimation(line[0], line[1], line[2])
-		addLineShadow(line[0])
-		animated.append([line[0], animation])
+		addLineAnimation(line[0], REAL_LINE_CONNECT_COLOR, line[2])
+		animated.append(line) # line[0] is html elem, line[1] is string with color, line[2] is list of either length 0 or 2 depending on if line is horizontal or not.
 
 # Removes the SVG animations and shadow filters from the global (animated) queue.
 def resetAnimations():
@@ -143,17 +143,21 @@ def resetAnimations():
 		front = animated.popleft()
 		elem = front[0]
 		animation = front[1]
-		resetShadow(elem) # code is used on elements that don't have shadows; could be optimized
-		elem.removeChild(animation)
+		if(isinstance(animation, str)): # is a line
+			resetLine(elem, animation, front[2])
+		elif(isinstance(animation, bool)): # is an opacity change for ghost nodes
+			elem.setAttribute("opacity", f"{GHOST_RECT_OPACITY}")
+		else: # is not a line
+			resetShadow(elem) # code is used on elements that don't have shadows; could be optimized
+			elem.removeChild(animation)
 
 # Could be unnecessary depending on the way we want our hovers to work.
 def animateAllMyNodes(tree, person, only_including=""):
-	# print(f"animating {person}")
 	tree[person]["animated"] = True
 	person_dict = tree[person]
 	if(person_dict["visited"]):
 		animateNode(person_dict["my_node"], person_dict["y"])
-	# animateLines(person_dict["lines"])
+	animateLines(person_dict["lines"])
 	
 	# animate ghost bigs
 	for ghost in person_dict["parent_ghost_nodes"]:
@@ -195,12 +199,20 @@ def animateAllOtherNodes(tree, person, animated, previous, end):
 	return
 
 # Gives (elem) the shadow filter seen in the svg-drawing
-def addShadow(elem):
+def addShadow(elem, change_opacity):
+	if(change_opacity):
+		elem.setAttribute("opacity", f"{ANIMATED_GHOST_RECT_OPACITY}")
+		animated.append([elem, True])
 	elem.setAttribute("filter", "url(#shadow)")
 
-def addLineShadow(elem):
-	elem.setAttribute("filter", "url(#line-shadow)")
+# Reverts the styling from a line animation.
+def resetLine(line, og_color, horizontal):
+	if(len(horizontal) == 2):
+		line.setAttribute('x1', f'{horizontal[0]}')
+		line.setAttribute('x2', f'{horizontal[1]}')
+	line.setAttribute("style", f"stroke: {og_color}; stroke-width: {STROKE_WIDTH};")
 
 # Removes the shadow filter from (elem)
 def resetShadow(elem):
 	elem.setAttribute("filter", "")
+

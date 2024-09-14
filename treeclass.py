@@ -1,8 +1,6 @@
 # This code makes the edge list used for drawing the tree.
 import app
-from draw import draw_full_tree
-from svgnodes import removeNodes
-from animation import resetAnimations
+from draw import click_event as set_tree
 from pyscript import when, document
 
 # app.data is originally set to None
@@ -50,9 +48,9 @@ class Tree:
     for row in app.data:
        if(row[0].lower() == input.lower()):
           self.in_tree = True
+          self.root = row[0] # name of person we want to build tree for
           break
     if(self.in_tree):
-      self.root = input # name of person we want to build tree for
       self.dict = {} # used to store the edge list
     return
     
@@ -76,6 +74,7 @@ class Tree:
     self.dict[input]["child_ghost_nodes"] = []
     self.dict[input]["top_big"] = False
     self.dict[input]["my_node"] = None
+    self.dict[input]["lines"] = []
     # self.dict[input]["parentGhostNodes"] = []
     # self.dict[input]["childGhostNodes"] = []
     # set bigs array
@@ -110,16 +109,15 @@ class Tree:
 @when("click", "#testButton")
 def testTree():
   print("Button Pushed.")
-  main_root = document.getElementById("tree_name").value
+  global input_name
+  input_name = document.getElementById("tree_name").value
   if(app.data == None):
     print(f"Data not recieved yet. Aborting...")
     return
-  tree = Tree(main_root) # tests code. output found in console
+  tree = Tree(input_name) # tests code. output found in console
   if(not tree.in_tree):
      print("Person is not in tree.")
      return
   tree.makeTree(tree.root)
-  resetAnimations()
-  removeNodes()
-  draw_full_tree(tree.dict, main_root)
+  set_tree(None, tree.dict, person=tree.root)
   return

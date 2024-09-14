@@ -1,0 +1,47 @@
+@keyframes fade {
+	from {opacity: 1.0}
+	to {opacity: 0.0}
+}
+
+.SVGanimate {
+	animation-name: fade;
+	animation-duration: 0.5s;
+	animation-iteration-count: 2;
+	animation-direction: alternate;
+	opacity: 1.0
+}
+
+#svg-drawing {
+	background-color: bisque;
+	border: 1px black solid;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 0;
+}
+
+#zoom-box {
+	width: 25px;
+	height: 50px;
+	opacity: 0.7;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 1;
+	background-color: rgb(40, 40, 35);
+	border-radius: 5px;
+	border: rgb(107, 107, 107) 1px solid
+}
+
+.zoom-button {
+	height: 25px;
+	width: 25px;
+}
+
+#demo {
+	color: blue;
+}
+
+.animated-line {
+	color: red;
+}

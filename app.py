@@ -2,6 +2,7 @@
 from pyscript import fetch, document, window
 import asyncio
 import json
+from draw import prepare_svg
 
 # NOTE: we can use web-workers to take a load off the main page but pyscript doesn't
 #		play nicely with web-workers. 
@@ -50,6 +51,7 @@ async def getAPIData():
 async def main():
 	await getAPIData()
 	document.getElementById("testButton").style = "visibility: visible"
+	prepare_svg()
 	return
 
 # necessary to run async code on browser.
