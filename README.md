@@ -1,6 +1,5 @@
 # Barkada of SCU's Official KAA Website
 ## Back-end architecture
-This part of the website is the code for the Cloud Run serverless thing
 - Our Cloud Run image runs using Flask and gunicorn.
 - Using Docker, it creates an image that Cloud Run uses to respond to HTTP requests.
 
@@ -20,3 +19,8 @@ The Cloud Run Server is necessary to for two reasons
 Using the data recieved, we place it into a python object and operate on it from there
 This is so much faster and more efficient than our previous approach, which was to make an API call 
   everytime we wanted to get data.
+
+## Drawing the Tree
+The part for drawing the tree uses an algorithm that is based on the Reingold-Tilford Algorithm, but it has been modified for our purposes.
+
+### Basic Drawing.
