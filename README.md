@@ -37,4 +37,7 @@ This is our "base algorithm" that we use and change to fit each edge case in our
 Since nodes in our tree can have more than one parent, there must be some way to place the other parents on the tree. 
 We decided to place the node right above the child it relates to, and we call these nodes "**Parent Ghost Nodes**".
 
-<img width="231" alt="Screenshot of a Parent Ghost Node in stated context" src="https://github.com/user-attachments/assets/751dae54-7e42-4907-8c69-5b71765a7ae5">
+<figure>
+  <img src="https://github.com/user-attachments/assets/23487b64-5afb-41b1-8096-dc002041024c" alt="Screenshot of a Parent Ghost Node in stated context">
+  <figcaption>In this example, "big 1" is the ghost big of "lil 1 2"</figcaption>
+</figure>
