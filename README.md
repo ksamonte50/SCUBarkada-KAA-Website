@@ -39,5 +39,6 @@ We decided to place the node right above the child it relates to, and we call th
 
 <figure>
   <img width = "231" src="https://github.com/user-attachments/assets/23487b64-5afb-41b1-8096-dc002041024c" alt="Screenshot of a Parent Ghost Node in stated context">
+  <br>
   <figcaption>In this example, "big 1" is the ghost big of "lil 1 2"</figcaption>
 </figure>
