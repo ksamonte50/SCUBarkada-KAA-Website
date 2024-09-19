@@ -38,6 +38,6 @@ Since nodes in our tree can have more than one parent, there must be some way to
 We decided to place the node right above the child it relates to, and we call these nodes "**Parent Ghost Nodes**".
 
 <figure>
-  <img src="https://github.com/user-attachments/assets/23487b64-5afb-41b1-8096-dc002041024c" alt="Screenshot of a Parent Ghost Node in stated context">
+  <img width = "231" src="https://github.com/user-attachments/assets/23487b64-5afb-41b1-8096-dc002041024c" alt="Screenshot of a Parent Ghost Node in stated context">
   <figcaption>In this example, "big 1" is the ghost big of "lil 1 2"</figcaption>
 </figure>
