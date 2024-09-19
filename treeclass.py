@@ -26,9 +26,8 @@ def searchNameForIndex(name):
     out = binarySearch(app.data, 0, len(app.data) - 1, input.lower()) 
     return out
       
-# binary search!
-# .lower() is used for string comparison 
-#   (should use casefold() instead, but micropython doesn't support that cmd)
+# Binary search that compares the first elements of each row.
+# .lower() is used for string comparison (should use casefold() but micropython doesn't support that cmd)
 def binarySearch(values, lo, hi, target):
     if lo <= hi:
         mid = (hi + lo) // 2
@@ -41,7 +40,7 @@ def binarySearch(values, lo, hi, target):
             return binarySearch(values, lo, mid - 1, target)
     return -1 # nada
 
-# using class for when we need more than one tree
+# Class that holds tree data
 class Tree:
   def __init__(self, input):
     self.in_tree = False
@@ -55,16 +54,29 @@ class Tree:
     return
     
   
-  # recursive function to build the dictionary with all necessary nodes
+  # Recursive function to build the dictionary with all necessary nodes
+  # Could be optimized to only look for necessary nodes for our tree.
+  # Parameters:
+  #   input {String} - Name of the person currently being operated on.
+  # Each attribute:
+  #   row: row # of (input)
+  #   x: x-position in SVG
+  #   y: y-position in SVG
+  #   visited: Tells if (input)'s node has been created yet or not.
+  #   parent_ghost_nodes: list that stores parent_ghost_nodes.
+  #   child_ghost_nodes: list that stores child_ghost_nodes.
+  #   top_big: tells if (input) is a top_big or not (see draw.draw_full_tree())
+  #   my_node: Stores the data for the SVG (nodes are lists of [rectangle, text])
+  #   lines: Stores the lines that should be highlighted when (input) is being animated.
   def makeTree(self, input):
-    print(f"treeclass: finding fam of {input}")
+    # print(f"treeclass: finding fam of {input}")
 
     # process data for (input)
     row = searchNameForIndex(input)
     if(row == -1):
       print(f"treeclass: did not find {input}")
       return
-    print(f"  row: {row}")
+    # print(f"  row: {row}")
     self.dict[input] = {}
     self.dict[input]["row"] = row
     self.dict[input]["x"] = 0
@@ -75,20 +87,18 @@ class Tree:
     self.dict[input]["top_big"] = False
     self.dict[input]["my_node"] = None
     self.dict[input]["lines"] = []
-    # self.dict[input]["parentGhostNodes"] = []
-    # self.dict[input]["childGhostNodes"] = []
-    # set bigs array
+    # Set bigs array
     if(len(app.data[row]) < 3):
       self.dict[input]["bigs"] = []
     else:
       self.dict[input]["bigs"] = splitComma(app.data[row][2])
-    # set littles array
+    # Set littles array
     if(len(app.data[row]) < 2):
       self.dict[input]["littles"] = []
     else:
       self.dict[input]["littles"] = splitComma(app.data[row][1])
 
-    # if (input)'s bigs or littles have not been processed yet, process them.
+    # If (input)'s bigs or littles have not been processed yet, process them.
     for bigName in self.dict[input]["bigs"]:
       if(bigName not in self.dict):
         self.makeTree(bigName)
@@ -96,7 +106,7 @@ class Tree:
       if(lilName not in self.dict):
         self.makeTree(lilName)
 
-  # function to print data of all nodes in the tree
+  # Function to print data of all nodes in the tree
   def printTree(self):
       for person in self.dict:
           print(person)
@@ -105,9 +115,9 @@ class Tree:
           print("  lils: " + str(self.dict[person]["littles"]))
       return
 
-# pyscript syntax for setting a click listener on button with id = "testButton"
+# Pyscript syntax for setting a click listener on button with id = "testButton"
 @when("click", "#testButton")
-def testTree():
+def createTreeOnPage():
   print("Button Pushed.")
   global input_name
   input_name = document.getElementById("tree_name").value

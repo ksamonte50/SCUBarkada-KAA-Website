@@ -2,19 +2,23 @@
 
 # Constants
 MAX_QUEUE_SIZE = 100
-# colors
+
+# Colors
 DEFAULT_COLOR = "orange"
 GHOST_PARENT_COLOR = "#93e0f5"
 NORMAL_GHOST_COLOR = "#f56262"
-# opacities
+ROOT_COLOR = "#b869f0"
+
+# Opacities
 GHOST_TEXT_OPACITY = 0.9
 GHOST_RECT_OPACITY = 0.6
 GHOST_LINE_OPACITY = 0.7
 
-x_increments = 100 # tentative?
-y_increments = 100 # ?
+# Determines distances between nodes on trees
+x_increments = 100 
+y_increments = 100 
 
-# Global variables to be used for animations (set in draw_f).
+# Global Variable used throughout code
 main_root = None
 
 import animation
@@ -30,14 +34,12 @@ from pyscript import document
 #		excluding { "" | String} - person to exclude from drawing of subtree.
 #		color {String | HEX Color} - color that (person)'s node will be drawn with
 #	Notes:
-#		This is a recursive function that operates in postorder.
+#		This is a recursive function that operates in preorder.
 #		This function does not draw the ghost parents first (person) in the recursive call
-#		This function (at its current form) does not place (person)'s node in the direct middle of the subtree.
 #	ASSUMPTION: 
 # 		- Ghost child nodes are ALWAYS placed to the RIGHT of real child nodes.
-# 	Returns the farthest right node in the subtree.
+# 	Returns the position of the farthest right node in the subtree.
 def draw_tree_down(tree, person, excluding="", color=DEFAULT_COLOR):
-	# print(f"draw_tree_down {person}")
 	# Create node if it has not already been created and store it in (html_node)
 	html_node = None
 	if(tree[person]["visited"] == False):
@@ -71,23 +73,21 @@ def draw_tree_down(tree, person, excluding="", color=DEFAULT_COLOR):
 		svgnodes.update_node_position(tree, person)
 		return tree[person]["x"]
 
+	# If we have littles, operate recursively throughout the tree.
 	my_starting_x = tree[person]["x"]
-	# Give initial x and y positions to littles if they are NOT visited and create their parent ghost nodes
-	begin_x = my_starting_x
-	x_inc = 0
-	lil_index = 0	
+	begin_x = my_starting_x # used to store where the next tree should start being built
+	lil_index = 0
+	# iterate on unvisited lils only first.
 	while lil_index < unvisited_lils_length:
 		little = unvisited_littles[lil_index]
 		tree[little]["x"] = begin_x
 		tree[little]["y"] = tree[person]["y"] + 2 * y_increments
-		x_inc += 1
-		# if(little == "lil 2"):
-		# 	print("I AM HERE")
 		
 		begin_x = draw_tree_down(tree, little)
 		begin_x += 1 * x_increments
+		# (begin_x) is now equal to where the next tree should start being built.
 
-		# Check if a sib of (little) became visited
+		# Check if a sib of (little) became visited. If they are, remove them from (unvisited_littles)
 		i = unvisited_lils_length - 1
 		stop_point = lil_index
 		while(i > stop_point):
@@ -114,6 +114,7 @@ def draw_tree_down(tree, person, excluding="", color=DEFAULT_COLOR):
 					tree[little]["parent_ghost_nodes"].append(new_ghost_node)
 					svgnodes.set_node_position(new_ghost_node["my_node"], new_ghost_node["x"], new_ghost_node["y"])
 					ghost_x_inc += 1
+			# If we had more than one ghost big, make sure to center (person) and their children under the nodes.
 			if(ghost_x_inc > 1):
 				distance_between_ghosts = (ghost_x_inc - 1) * x_increments 
 				begin_x += distance_between_ghosts
@@ -121,10 +122,9 @@ def draw_tree_down(tree, person, excluding="", color=DEFAULT_COLOR):
 				tree[little]["x"] += offset
 				offset_littles_x(tree, little, offset)
 				svgnodes.update_node_position(tree, little)
-		
 		lil_index += 1
 
-	# If the littles ARE visited, it means they are somewhere else in the tree. make a child ghost node instead
+	# If the littles ARE visited, it means they are somewhere else in the tree. Make a child ghost node instead at the far right of the subtree.
 	for little in visited_littles:
 		new_ghost_node = {
 			"name": little,
@@ -133,7 +133,6 @@ def draw_tree_down(tree, person, excluding="", color=DEFAULT_COLOR):
 			"y": tree[person]["y"] + 2 * y_increments, 
 			"lines": []
 		}
-		x_inc += 1 # treat it like a real node for far_right_x
 		add_ghost_mouseover_event(tree, person, new_ghost_node)
 		add_click_event(tree, person=person, ghost_dict=new_ghost_node)
 		tree[person]["child_ghost_nodes"].append(new_ghost_node)
@@ -158,12 +157,12 @@ def draw_tree_down(tree, person, excluding="", color=DEFAULT_COLOR):
 	farthest_right_x = begin_x - 1 * x_increments
 	return farthest_right_x
 
-# Offsets right sibs and their children using either a boundary or set amount. Used only in draw_tree_down atm
+# Offsets all nodes in the subtree of (person) by (amt)
 #	Parameters:
 # 		tree {Hash Map / Dict} - Has all the information about people in our tree
 # 		person {String} - name of the person we are processing
 #		amt {Number | 0} - amount used for offsetting nodes.
-#		not_including {String | ""} - name of little to not offset. used mainly when drawing tree upwards
+#		not_including {String | ""} - name of little to not offset.
 # Returns the farthest_right_x of the nodes operated on.
 def offset_littles_x(tree, person, amt, not_including=""):
 	farthest_right_x = tree[person]["x"]
@@ -172,24 +171,18 @@ def offset_littles_x(tree, person, amt, not_including=""):
 	skip_list = []
 	skip_list.append(not_including)
 
-	# Update person's ghost children and add them to skip_list
+	# Update person's ghost children and add them to (skip_list) so their real node is not offset
 	for ghost in tree[person]["child_ghost_nodes"]:
 		ghost["x"] += amt
 		if(ghost["x"] > farthest_right_x):
 			farthest_right_x = ghost["x"]	
-		# Don't update the actual node of ghost child.
 		svgnodes.set_node_position(ghost["my_node"], ghost["x"], ghost["y"])
 		skip_list.append(ghost["name"])
 
-	# Offset each person’s x in the list by (amt)
+	# Offset each little’s x in (person)'s littles list by (amt)
 	for little in tree[person]["littles"]:
-		# Avoid anyone in skip_list
-		skip = False
-		for skipped in skip_list:
-			if(little == skipped):
-				skip = True
-		# If we are using only_include and little is not them, skip. This is spaghetti code btw
-		if(not tree[little]["visited"] or skip): 
+		# Avoid anyone not created yet or in skip_list
+		if(not tree[little]["visited"] or (little in skip_list)): 
 			continue
 		# Offset little
 		tree[little]["x"] += amt
@@ -197,7 +190,7 @@ def offset_littles_x(tree, person, amt, not_including=""):
 			farthest_right_x = tree[little]["x"]
 		svgnodes.set_node_position(tree[little]["my_node"], tree[little]["x"], tree[little]["y"])
 
-		# Update little's ghost parents
+		# Update (little)'s ghost parents
 		for ghost in tree[little]["parent_ghost_nodes"]:
 			ghost["x"] += amt
 			svgnodes.set_node_position(ghost["my_node"], ghost["x"], ghost["y"])
@@ -212,38 +205,41 @@ def offset_littles_x(tree, person, amt, not_including=""):
 # Draws tree upwards
 # Parameters:
 # 		tree {Hash Map / Dict} - Has all the information about people in our tree
-#		queue {collections.deque} - Holds data of what to operate on next. BFS algorithm.
+#		queue {collections.deque} - Holds data of what to operate on next. See draw_full_tree() for description of data.
 # 		direction {-1 | +1} - Direction of drawing, either left or right
 #		outward_offset {Number} - Offset generated from the previous iteration of BFS.
-#		excluding {list} - who we should exclude from drawing.
 # Notes:
 #		- IMPORTANT nodes are created from their littles' function, so they are NOT created during thier function.
-#		- Queue operations are append() to add and popleft() do remove.
+#		- Queue operations are append() to add and popleft() to remove.
 #		- Queue has data of [current_person, who_they_came_from]
 #		- "top_big" attribute means they are a part of the "fanning" pattern at the top of the tree.
-def draw_tree_up(tree, queue, direction, outward_offset, excluding = []):
+def draw_tree_up(tree, queue, direction, outward_offset):
 	front = queue.popleft()
 	person = front[0]
 	current_little = front[1]
 
+	# Check for already created bigs in (queue). If they were already created, make a ghost parent for (current_little) instead of a real one.
 	if(tree[person]["top_big"]):
-		# Draw Ghost big for (current_little) since (person) has already been processed
 		num_ghosts = len(tree[person]["parent_ghost_nodes"])
 		ghost_dict = None
 		if(num_ghosts > 0):
 			ghost_index = 0
+			# WARNING: extremely scuffed "centering" being done here. Will make the tree look weirder the more bigs are attatched to one person.
+			# Works ok with someone with 2 parent_ghost_nodes, but the more the worse it gets.
 			while(ghost_index < num_ghosts):
 				ghost_dict = tree[person]["parent_ghost_nodes"][ghost_index]
 				ghost_dict["x"] -= 0.5 * x_increments
 				svgnodes.set_node_position(ghost_dict["my_node"], ghost_dict["x"], ghost_dict["y"])
 				ghost_index += 1
 
+		# If we have no other Ghost Bigs, use current x as ghost_parent's x.
 		your_x = 0
 		if(ghost_dict == None):
 			your_x = tree[current_little]["x"]
 		else:
 			your_x = ghost_dict["x"] + 1 * x_increments
 
+		# Create the node.
 		new_ghost_node = {
 			"name": person,
 			"my_node": svgnodes.make_node(person, NORMAL_GHOST_COLOR, GHOST_RECT_OPACITY),
@@ -255,18 +251,18 @@ def draw_tree_up(tree, queue, direction, outward_offset, excluding = []):
 		add_click_event(tree, person=current_little, ghost_dict=new_ghost_node)
 		tree[current_little]["parent_ghost_nodes"].append(new_ghost_node)
 		svgnodes.set_node_position(new_ghost_node["my_node"], new_ghost_node["x"], new_ghost_node["y"])
-		print(f"{current_little}'s new parent is {person}")
+		# Check if the queue is done; if not, continue like normal.
 		if(len(queue) > 0):
 			draw_tree_up(tree, queue, direction, outward_offset = outward_offset)
 		return
 
+	# Draw (person)'s subtree, making sure to start from the right of the far_right node.
 	tree[person]["x"] += outward_offset
-	# Draw the subtree
 	starting_x = tree[person]["x"]
 	far_x = draw_tree_down(tree, person, excluding=current_little)
 	tree[person]["top_big"] = True
 
-	# If we are moving left, offset all nodes to the left by the distance travelled.
+	# If we are moving left, offset all nodes to the left by the distance travelled and change out to give the far left x.
 	total_offset = 0
 	out = far_x
 	if(direction < 0):
@@ -330,7 +326,7 @@ def draw_full_tree(tree, person):
 	tree[person]["visited"] = True
 	tree[person]["x"] = 0
 	tree[person]["y"] = 0
-	html_node = svgnodes.make_node(person, "#b869f0")
+	html_node = svgnodes.make_node(person, f"{ROOT_COLOR}")
 	html_node[0].setAttribute("class", "main-root")
 	tree[person]["my_node"] = html_node
 	tree[person]["top_big"] = True
@@ -348,11 +344,8 @@ def draw_full_tree(tree, person):
 	# tree[person]["x"] = (ending_x + starting_x) / 2 # corner cut right here. could be centered between immediate children instead of whole tree.
 	svgnodes.update_node_position(tree, person)
 
+	# Prepare to draw bigs.
 	bigs_length = len(tree[person]["bigs"])
-	if(bigs_length == 0):
-		# no bigs, no problems
-		svgnodes.draw_lines(tree, person)
-		return
 	if(bigs_length == 1):
 		# draw big to the right
 		rightQueue = deque([], MAX_QUEUE_SIZE)
@@ -365,7 +358,6 @@ def draw_full_tree(tree, person):
 
 			# Make node
 			tree[big]["visited"] = True
-			# tree[big]["top_big"] = True
 			html_node = svgnodes.make_node(big, DEFAULT_COLOR)
 			svgnodes.set_node_position(html_node, tree[big]["x"], tree[big]["y"])
 			tree[big]["my_node"] = html_node
@@ -382,7 +374,6 @@ def draw_full_tree(tree, person):
 	if(bigs_length >= 2):
 		# Add bigs into 2 separate queues, one going left and one going right
 		# Split bigs down the middle to support people with more than 2 bigs.
-		# tree[person]["top_big"] = True
 		middle_index = bigs_length // 2 
 		leftQueue = deque([], MAX_QUEUE_SIZE)
 		rightQueue = deque([], MAX_QUEUE_SIZE)
@@ -397,7 +388,6 @@ def draw_full_tree(tree, person):
 
 			# Make node
 			tree[big]["visited"] = True
-			# tree[big]["top_big"] = True
 			html_node = svgnodes.make_node(big, DEFAULT_COLOR)
 			svgnodes.set_node_position(html_node, tree[big]["x"], tree[big]["y"])
 			tree[big]["my_node"] = html_node
@@ -408,7 +398,7 @@ def draw_full_tree(tree, person):
 			leftQueue.append([big, person])
 			bigIndex -= 1
 
-		# Add right bigs to queue
+		# Add Right Bigs to Queue
 		bigIndex = middle_index
 		while bigIndex < bigs_length:
 			big = tree[person]["bigs"][bigIndex]
@@ -418,7 +408,6 @@ def draw_full_tree(tree, person):
 
 			# Make node
 			tree[big]["visited"] = True
-			# tree[big]["top_big"] = True
 			html_node = svgnodes.make_node(big, DEFAULT_COLOR)
 			svgnodes.set_node_position(html_node, tree[big]["x"], tree[big]["y"])
 			tree[big]["my_node"] = html_node
@@ -438,7 +427,6 @@ def draw_full_tree(tree, person):
 
 # Gives mouseover behavior to (person)'s node
 def add_real_mouseover_event(tree, person):
-	# print(f"mouseover: {person}")
 	tree[person]["my_node"][1].addEventListener("mouseover", lambda e: animation.real_mouseover_event(e, tree, person))
 
 # Gives mouseover behavior to (ghost_dict)'s node
@@ -454,7 +442,7 @@ def add_click_event(tree, person=None, ghost_dict=None):
 		ghost_dict["my_node"][1].addEventListener("click", lambda e: click_event(e, tree, person=person, ghost_dict=ghost_dict))
 		ghost_dict["my_node"][1].addEventListener("touchstart", lambda e: click_event(e, tree, person=person, ghost_dict=ghost_dict))
 
-# Variables for animation for svg fading set in click_event
+# Variables for animation for SVG fading behavior set in a click_event()
 iteration_count = 0
 tree_dict = None
 input_name = None
@@ -467,7 +455,7 @@ def prepare_svg():
 
 # On a click, make a new tree with clicked person as the root.
 def click_event(e, tree, person=None, ghost_dict=None):
-	# Checks for mobile compatibility
+	# Checks done for mobile compatibility
 	if(e != None):
 		e.preventDefault()
 		e.stopPropagation()
@@ -492,7 +480,6 @@ def click_event(e, tree, person=None, ghost_dict=None):
 def switchTree(e):
 	global iteration_count
 	iteration_count += 1
-	# print(f"{iteration_count}")
 	svg = document.getElementById("svg-drawing")
 	if(iteration_count == 1):
 		animation.resetAnimations()

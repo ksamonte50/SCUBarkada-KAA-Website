@@ -11,6 +11,14 @@
 	opacity: 1.0
 }
 
+#svg-container {
+	max-width: 2000px; 
+	margin: auto; 
+	position: relative;
+	/* border: 1px solid red; */
+	display: flex;
+}
+
 #svg-drawing {
 	background-color: bisque;
 	border: 1px black solid;
@@ -18,6 +26,14 @@
 	top: 0px;
 	left: 0px;
 	z-index: 0;
+}
+
+#load-screen {
+	position: absolute;
+	font-size: 30px;
+	top: calc(30px);
+	left: calc(50% - 30px);
+	z-index: 2;
 }
 
 #zoom-box {

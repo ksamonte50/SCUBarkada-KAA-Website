@@ -13,8 +13,11 @@
 	<body>
 		<p id = "demo">This P contains info. maybe. or maybe not</p>
 		<input type = "text" id="tree_name" placeholder="Type a name here..."></input>
-		<button type="button" id="testButton" style="visibility: hidden">Click!</button>
-		<div id = "svg-container" style = "max-width: 2000px; margin: auto; position: relative" >
+		<button type="button" id="testButton" style="display: none">Click!</button>
+		<div id = "svg-container">
+			<div id="load-screen">
+				Loading...
+			</div>
 			<div id="zoom-box">
 				<button class="zoom-button" id="plus-zoom">+</button>
 				<button class="zoom-button" id="minus-zoom">-</button>
@@ -28,7 +31,6 @@
 						<feDropShadow dx="2" dy="4" stdDeviation="2.5"/>
 					</filter>
 				</defs>
-				<circle cx="0" cy= "0" r="40" stroke="green" stroke-width="2" fill="green" filter="url(#shadow)"/>'
 			</svg>
 		</div>
 		<mpy-config>

@@ -21,6 +21,7 @@ var currentTouchDistance = 0;
 
 document.body.onload = function() {
 	drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+	checkSize()
 }
 
 // this function updates the position and size of the svg, since it can be resized and repositioned.
@@ -30,6 +31,7 @@ var checkSize = function() {
 	
 	scale = defaultWidth / viewBox.width;
 	drawingPosition = drawing.getBoundingClientRect();
+	// container.style.height = `${defaultHeight}px`
 };
 
 // Event listener for canvas switching event. Used to center the canvas over the new node.

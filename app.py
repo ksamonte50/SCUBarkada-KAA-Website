@@ -10,7 +10,7 @@ from draw import prepare_svg
 #		DOM. This is because there are necessary headers and config settings that
 #		make the DOM not work with web workers.
 
-# TODO GET_URL could be an environment varible (if we can access those)
+# TODO GET_URL could be an environment varible
 GET_URL = "https://python-sheets-data-gixw5eexra-uw.a.run.app"
 # GET_URL = "https://jsonplaceholder.typicode.com/users"
 
@@ -20,7 +20,7 @@ data = None
 # 		(for us, if the person has no bigs, their row will only have 2 indexes instead of 3).
 #		to address this, code has been put in treeclass.splitComma() that addresses this.
 
-# getter functions of data (not used atm)
+# Getter functions of data (not used atm)
 def getAllData():
 	return data
 def getData(row, col):
@@ -28,7 +28,7 @@ def getData(row, col):
 		return data[row][col]
 	return None
 
-# function that makes the request to the API
+# Function that makes the request to the API
 # 	Status code is 200 if the request was sucessful
 async def getAPIData():
 	rawResult = None
@@ -47,10 +47,11 @@ async def getAPIData():
 		print(f"app.py: Something went wrong (ERRNO {rawResult.status}).")
 		return
 
-# edit the DOM to account for sucessful data retrieval
+# Edit the DOM after data is retrieved
 async def main():
 	await getAPIData()
-	document.getElementById("testButton").style = "visibility: visible"
+	document.getElementById("load-screen").style.display = "none"
+	document.getElementById("testButton").style.display = "inline"
 	prepare_svg()
 	return
 
@@ -58,4 +59,5 @@ async def main():
 def getData(event):
 	asyncio.create_task(main())
 
+# Run the async code as soon as all our modules are loaded
 window.addEventListener("py:all-done", getData)
