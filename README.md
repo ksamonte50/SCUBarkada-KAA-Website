@@ -38,20 +38,36 @@ This is our "base algorithm" that we use and change to fit each edge case in our
 When using the basic_operation() recursively, the function returns the farthest right node it created. This is done to ensure that no nodes overlap when drawing their trees.
 - The recursion is done postorder
 - A sib of a node could be visited during another child's basic_operation(). We must check if nodes become visited after each node is looked at.
-```
-function recursive_basic_operation():
-  Give a node an X position of 0 and set an int x_inc to 0
-  Declare begin_x
-  For each child:
-    Give it an x position of 0 + x_inc
-    Give it a y position of (parent's y - 2), then add 1 to x_inc.
-    begin_x = recursive_basic_operation() on child + 1 x_increment
-  Center the original node over its children.
-
-  return begin_x - 1 x_increment
-```
 
 ### Drawing Downwards
+```
+# Precondition: person has an x and y position, and is not visited yet.
+x_increments = distance for 1 x increment (in pixels)
+y_increments = distance for 1 y increment (in pixels)
+function recursive_basic_operation(person):
+  Visit node and create SVG content
+  unvisited_littles = All unvisited littles of person
+  visited_littels = All visited littles of person
+  Initialize begin_x to person's x
+
+  For each little in unvisted_littles:
+    Give little an x position of begin_x
+    Give little a y position of (parent's y + 2 y_increments)
+    begin_x = recursive_basic_operation(child) + 1 x_increments
+    If a little in unvisited_littles was visited, remove them from unvisited_littles and add them to visited_littles.
+    Make ghost bigs if little has any
+
+  For each little in visited_littles:
+    Make HTML node for ghost little
+    begin_x += 1 x_increments
+    Give it x position of the new begin_x
+    Give little a y position of (parent's y + 2 y_increments)
+
+  Center person over its children.
+  Draw person node to SVG
+  return begin_x - 1 x_increment
+```
+** Explanation: **
 Since nodes in our tree can have more than one parent, there must be some way to place the other parents on the tree. 
 We decided to place the node right above the child it relates to, and we call these nodes "**Parent Ghost Nodes**".
 
