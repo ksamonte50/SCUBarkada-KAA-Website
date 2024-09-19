@@ -55,7 +55,7 @@ function recursive_basic_operation(person):
     Give little a y position of (parent's y + 2 y_increments)
     begin_x = recursive_basic_operation(child) + 1 x_increments
     If a little in unvisited_littles was visited, remove them from unvisited_littles and add them to visited_littles.
-    Make ghost bigs if little has any
+    Make ghost bigs if little has any and offset person its child nodes to center it under the ghost parents
 
   For each little in visited_littles:
     Make HTML node for ghost little
