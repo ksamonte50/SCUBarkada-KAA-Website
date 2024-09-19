@@ -25,6 +25,7 @@ The part for drawing the tree uses an algorithm that is based on the Reingold-Ti
 
 ### Basic Operation
 ```
+function basic_operation():
   Give a node an X position of 0 and set an int x_inc to 0
   For each child:
     Give it an x position of 0 + x_inc
@@ -33,10 +34,31 @@ The part for drawing the tree uses an algorithm that is based on the Reingold-Ti
 ```
 This is our "base algorithm" that we use and change to fit each edge case in our tree.
 
+### Recursion
+When using the basic_operation() recursively, the function returns the farthest right node it created. This is done to ensure that no nodes overlap when drawing their trees.
+- The recursion is done postorder
+- A sib of a node could be visited during another child's basic_operation(). We must check if nodes become visited after each node is looked at.
+```
+function recursive_basic_operation():
+  Give a node an X position of 0 and set an int x_inc to 0
+  Declare begin_x
+  For each child:
+    Give it an x position of 0 + x_inc
+    Give it a y position of (parent's y - 2), then add 1 to x_inc.
+    begin_x = recursive_basic_operation() on child + 1 x_increment
+  Center the original node over its children.
+
+  return begin_x - 1 x_increment
+```
+
 ### Drawing Downwards
 Since nodes in our tree can have more than one parent, there must be some way to place the other parents on the tree. 
 We decided to place the node right above the child it relates to, and we call these nodes "**Parent Ghost Nodes**".
 
 <img width = "231" src="https://github.com/user-attachments/assets/23487b64-5afb-41b1-8096-dc002041024c" alt="Screenshot of a Parent Ghost Node in stated context">
 
-* *In this example, "big 1" is the ghost big of "lil 1 2"* *
+*In this example, "big 1" is the ghost big of "lil 1 2"*
+
+The "Real parent" of the node is actually 2 y-increments above the child, and the ghost nodes are placed 1 y-increment above. This is done because it is easier to deal with overlap issues this way.
+
+Some nodes may have more than 1 of these ghost nodes, so we have to use the basic operation upward this time.
