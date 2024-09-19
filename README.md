@@ -23,4 +23,18 @@ This is so much faster and more efficient than our previous approach, which was 
 ## Drawing the Tree
 The part for drawing the tree uses an algorithm that is based on the Reingold-Tilford Algorithm, but it has been modified for our purposes.
 
-### Basic Drawing.
+### Basic Operation
+```
+  Give a node an X position of 0 and set an int x_inc to 0
+  For each child:
+    Give it an x position of 0 + x_inc
+    Give it a y position of (parent's y - 2), then add 1 to x_inc.
+  Center the original node over its children.
+```
+This is our "base algorithm" that we use and change to fit each edge case in our tree.
+
+### Drawing Downwards
+Since nodes in our tree can have more than one parent, there must be some way to place the other parents on the tree. 
+We decided to place the node right above the child it relates to, and we call these nodes "**Parent Ghost Nodes**".
+
+![Screenshot of a Parent Ghost Node in stated context] (/assets/images/)
