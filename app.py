@@ -49,9 +49,13 @@ async def getAPIData():
 
 # Edit the DOM after data is retrieved
 async def main():
+	print("hi")
 	await getAPIData()
 	document.getElementById("load-screen").style.display = "none"
 	document.getElementById("testButton").style.display = "inline"
+	input_field = document.getElementById("tree_name")
+	print("before")
+	set_autocomplete(input_field)
 	prepare_svg()
 	return
 
@@ -61,3 +65,49 @@ def getData(event):
 
 # Run the async code as soon as all our modules are loaded
 window.addEventListener("py:all-done", getData)
+
+
+item_box = None
+values = []
+# Takes two arguments, input element and array of strings
+def set_autocomplete(input):
+	input_field = document.getElementById("tree_name")
+	global values
+	for row in data:
+		values.append(row[0])
+	input.addEventListener("input", lambda e: inputEvent(input_field))
+
+def inputEvent(input):
+	clear_autocomplete()
+	global item_box
+	value = input.value
+	value_length = len(value)
+	container = document.getElementById("autocomplete-container")
+	item_box = document.createElement("DIV")
+	item_box.setAttribute("id", "autocomplete-box")
+	document.body.addEventListener("click", clear_autocomplete)
+	container.appendChild(item_box)
+	global values
+	for person in values:
+		if(person.strip().lower()[0:value_length] == value.lower()):
+			new_option = document.createElement("DIV")
+			new_option.setAttribute("class", "autocomplete-item")
+			new_option.innerHTML = person
+			new_option.addEventListener("click", lambda e: click_option(e))
+			item_box.appendChild(new_option)
+
+def click_option(event):
+	if(event != None):
+		name = event.target.innerHTML
+		print(name)
+		document.getElementById("tree_name").value = name
+		clear_autocomplete()
+
+def clear_autocomplete(e=None):
+	document.body.removeEventListener("click", clear_autocomplete)
+	item_box = document.getElementById("autocomplete-box")
+	if(item_box != None):
+		while(item_box.firstChild):
+			item_box.removeChild(item_box.lastChild)
+		item_box.parentNode.removeChild(item_box)
+		

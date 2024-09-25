@@ -45,6 +45,7 @@ def make_node(name, color, opacity=1.0):
 		display: table-cell; \
 		vertical-align: middle; \
 		font-size: 11px; \
+		overflow: hidden; \
 	")
 
 	# create text holder
@@ -54,6 +55,7 @@ def make_node(name, color, opacity=1.0):
 		width: {NODE_WIDTH}px; \
 		height: {NODE_HEIGHT}px; \
 		text-align: center; \
+		cursor: pointer; \
 	")
 
 	# append text to content and content to div holder
