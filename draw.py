@@ -26,6 +26,7 @@ import svgnodes
 
 from collections import deque
 from pyscript import document
+from js import Event
 
 # Draws the subtree of the root given in the tree
 #	Parameters:
@@ -35,7 +36,7 @@ from pyscript import document
 #		color {String | HEX Color} - color that (person)'s node will be drawn with
 #	Notes:
 #		This is a recursive function that operates in preorder.
-#		This function does not draw the ghost parents first (person) in the recursive call
+#		This function draws the ghost parents for (person)'s littles.
 #	ASSUMPTION: 
 # 		- Ghost child nodes are ALWAYS placed to the RIGHT of real child nodes.
 # 	Returns the position of the farthest right node in the subtree.
@@ -67,7 +68,7 @@ def draw_tree_down(tree, person, excluding="", color=DEFAULT_COLOR):
 	unvisited_lils_length = len(unvisited_littles) 
 
 
-	# If we have no littles, skip most of the alignment stuff
+	# If we have no littles, skip the recursion and alignment stuff
 	total_length = unvisited_lils_length + len(visited_littles)
 	if(total_length == 0):
 		svgnodes.update_node_position(tree, person)
@@ -209,10 +210,10 @@ def offset_littles_x(tree, person, amt, not_including=""):
 # 		direction {-1 | +1} - Direction of drawing, either left or right
 #		outward_offset {Number} - Offset generated from the previous iteration of BFS.
 # Notes:
-#		- IMPORTANT nodes are created from their littles' function, so they are NOT created during thier function.
 #		- Queue operations are append() to add and popleft() to remove.
 #		- Queue has data of [current_person, who_they_came_from]
 #		- "top_big" attribute means they are a part of the "fanning" pattern at the top of the tree.
+#		- IMPORTANT there is a small chance of overlap occurring on the branch closest to (person), but extremely unlikely.
 def draw_tree_up(tree, queue, direction, outward_offset):
 	front = queue.popleft()
 	person = front[0]
@@ -224,11 +225,10 @@ def draw_tree_up(tree, queue, direction, outward_offset):
 		ghost_dict = None
 		if(num_ghosts > 0):
 			ghost_index = 0
-			# WARNING: extremely scuffed "centering" being done here. Will make the tree look weirder the more bigs are attatched to one person.
-			# Works ok with someone with 2 parent_ghost_nodes, but the more the worse it gets.
+			# Branches ghost_bigs towards the center, removing MOST cases of overlap.
 			while(ghost_index < num_ghosts):
 				ghost_dict = tree[person]["parent_ghost_nodes"][ghost_index]
-				ghost_dict["x"] -= 0.5 * x_increments
+				ghost_dict["x"] -= 0.5 * x_increments * direction
 				svgnodes.set_node_position(ghost_dict["my_node"], ghost_dict["x"], ghost_dict["y"])
 				ghost_index += 1
 
@@ -255,7 +255,7 @@ def draw_tree_up(tree, queue, direction, outward_offset):
 		if(len(queue) > 0):
 			draw_tree_up(tree, queue, direction, outward_offset = outward_offset)
 		return
-
+	
 	# Draw (person)'s subtree, making sure to start from the right of the far_right node.
 	tree[person]["x"] += outward_offset
 	starting_x = tree[person]["x"]
@@ -314,13 +314,14 @@ def draw_tree_up(tree, queue, direction, outward_offset):
 	return
 
 # Sets up the root node and immediate bigs for drawing.
-# Parameters are self-explanitory
+# Parameters are self-explanatory
 # NOTE 	The reason why we make immediate parent nodes here is because during 
 # 		the draw_tree_up, we want a more balanced tree. If we didn't visit
 #		the node here and the immediate right parents are found in the left
 # 		parent's tree (2 bigs pick up 2 littles case), it would be extremely
 #		unbalanced. Can be removed if we improve BFS by alternating directions.
 # NOTE Queues have data of [current_person, who_they_came_from]
+# Returns the x position of (person)
 def draw_full_tree(tree, person):
 	# Make root node.
 	tree[person]["visited"] = True
@@ -341,7 +342,7 @@ def draw_full_tree(tree, person):
 	ending_x = draw_tree_down(tree, person, color="red")
 	total_offset = ending_x - starting_x
 	# print(f"total_offset: {total_offset}")
-	# tree[person]["x"] = (ending_x + starting_x) / 2 # corner cut right here. could be centered between immediate children instead of whole tree.
+	# tree[person]["x"] = (ending_x + starting_x) / 2 
 	svgnodes.update_node_position(tree, person)
 
 	# Prepare to draw bigs.
@@ -423,6 +424,8 @@ def draw_full_tree(tree, person):
 		draw_tree_up(tree, rightQueue, direction = +1, outward_offset = starting_x + (1 * x_increments) + total_offset)
 	# DRAW LINES
 	svgnodes.draw_lines(tree, person)
+	
+	return tree[person]["x"]
 
 
 # Gives mouseover behavior to (person)'s node
@@ -444,7 +447,7 @@ def add_click_event(tree, person=None, ghost_dict=None):
 
 # Variables for animation for SVG fading behavior set in a click_event()
 iteration_count = 0
-tree_dict = None
+animation_x = 0
 input_name = None
 
 # Adds event listeners to the svg 
@@ -471,7 +474,7 @@ def click_event(e, tree, person=None, ghost_dict=None):
 		global input_name
 		tree_dict = tree
 		input_name = ghost_dict["name"]
-	
+
 	# Add animation to the svg
 	svg = document.getElementById("svg-drawing")
 	svg.classList.add("SVGanimate")
@@ -479,6 +482,7 @@ def click_event(e, tree, person=None, ghost_dict=None):
 # Switches the tree to the person clicked
 def switchTree(e):
 	global iteration_count
+	global animation_x
 	iteration_count += 1
 	svg = document.getElementById("svg-drawing")
 	if(iteration_count == 1):
@@ -486,7 +490,12 @@ def switchTree(e):
 		svgnodes.removeNodes()
 		resetDict(tree_dict)
 		if(tree_dict != None and input_name != None):
-			draw_full_tree(tree_dict, input_name)
+			animation_x = draw_full_tree(tree_dict, input_name)
+		# set value attribute of drawing for animationiteration event in zoom.js
+		newEvent = Event.new("setsvgcenter")
+		print(f"pyscript says {animation_x}")
+		svg.setAttribute("value", f"{animation_x}")
+		svg.dispatchEvent(newEvent)
 	elif(iteration_count == 2):
 		iteration_count = 0
 		svg.classList.remove("SVGanimate")
