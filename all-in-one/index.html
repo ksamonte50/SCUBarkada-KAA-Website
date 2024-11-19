@@ -1,0 +1,39 @@
+<!-- With this setup, the code calls the api and the treeclass.makeTree() function -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale = 1" />
+		<title>Tree Test</title>
+		<link rel="stylesheet" href="./tree.css">
+		<link rel="stylesheet" href="https://pyscript.net/releases/2024.7.1/core.css">
+      	<script type="module" src="https://pyscript.net/releases/2024.7.1/core.js"></script>
+
+	</head>
+	<body>
+		<p id = "demo">This P contains info. maybe. or maybe not</p>
+		<input type = "text" id="tree_name" placeholder="Type a name here..."></input>
+		<button type="button" id="testButton" style="display: none">Click!</button>
+		<div id = "svg-container">
+			<div id="load-screen">
+				Loading...
+			</div>
+			<div id="zoom-box">
+				<button class="zoom-button" id="plus-zoom">+</button>
+				<button class="zoom-button" id="minus-zoom">-</button>
+			</div>
+			<svg id = "svg-drawing">
+				<defs id = "defs">
+					<filter id="shadow" width="125" height="125">
+						<feDropShadow dx="0" dy="4" stdDeviation="2.5"/>
+					</filter>
+					<filter id="line-shadow" width="125" height="125">
+						<feDropShadow dx="2" dy="4" stdDeviation="2.5"/>
+					</filter>
+				</defs>
+			</svg>
+		</div>
+		<script type="mpy" src="tree.py" async></script>
+		<script type = "text/javascript" src="zoom.js"></script>
+	</body>
+</html>

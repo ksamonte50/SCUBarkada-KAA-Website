@@ -1,0 +1,114 @@
+@keyframes fade {
+	from {opacity: 1.0}
+	to {opacity: 0.0}
+}
+
+body {
+	background-color: #eeeeee;
+}
+
+.SVGanimate {
+	animation-name: fade;
+	animation-duration: 0.5s;
+	animation-iteration-count: 2;
+	animation-direction: alternate;
+	opacity: 1.0
+}
+
+#svg-container {
+	max-width: 2000px; 
+	margin: auto; 
+	position: relative;
+	/* border: 1px solid red; */
+	display: flex;
+}
+
+#svg-drawing {
+	background-color: bisque;
+	border: 1px black solid;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 0;
+}
+
+#load-screen {
+	position: absolute;
+	font-size: 30px;
+	top: calc(30px);
+	left: calc(50% - 30px);
+	z-index: 2;
+}
+
+#zoom-box {
+	width: 25px;
+	height: 50px;
+	opacity: 0.7;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 1;
+	background-color: rgb(40, 40, 35);
+	border-radius: 5px;
+	border: rgb(107, 107, 107) 1px solid
+}
+
+.zoom-button {
+	height: 25px;
+	width: 25px;
+}
+
+#demo {
+	color: blue;
+}
+
+.animated-line {
+	color: red;
+}
+
+
+/* width = 0.9 container width */
+#tree_name {
+	width: 180px;
+	height: 20px;
+}
+
+/* width = 0.9 container width */
+/* height = 4 * tree_name height */
+/* top = tree_name height + 5 */
+#autocomplete-box {
+	position: absolute;		  
+	border-left: none;
+	z-index: 3;
+	top: 25; 
+	min-width: 180px; 
+	max-height: 90px;
+	border-radius: 5px;
+	overflow: auto;
+}
+
+#autocomplete-container {
+	position: relative;
+	display: inline-block;
+	width: 200px;
+	padding-bottom: 10px;
+}
+
+.autocomplete-item {
+	width: 165px; 
+	height: 30px;
+	border-top: none;
+	border-right: none;
+	border-bottom: none;
+	display: flex;
+	padding-left: 5px;
+	padding-right: 5px;
+	margin: auto;
+	align-items: center;	
+	background-color: #eeeeee;
+}
+
+.autocomplete-item:hover {
+	cursor: pointer;
+	background-color: #dddddd;
+}
