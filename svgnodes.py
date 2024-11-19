@@ -10,10 +10,10 @@ NODE_HEIGHT = 50
 STROKE_WIDTH = 2
 
 CHILD_LINE_COLOR = "black"
-REAL_PARENT_LINE_COLOR = "#ff9933"
+REAL_PARENT_LINE_COLOR = "#ff7b00"
 GHOST_PARENT_LINE_COLOR = "gray"
 
-REAL_LINE_CONNECT_COLOR = "#542998"
+REAL_LINE_CONNECT_COLOR = "#fdb833"
 
 from draw import x_increments, y_increments, GHOST_LINE_OPACITY
 from pyscript import document
