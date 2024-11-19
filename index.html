@@ -11,10 +11,27 @@
 
 	</head>
 	<body>	
+
 		<div id="autocomplete-container">
 			<input type = "text" id="tree_name" placeholder="Type a name here..."></input>
 		</div>
 		<button type="button" id="testButton" style="display: none">Click!</button>
+		<button type="button" id="helpButton">Help!</button>
+		<div id="help-box">
+			<h1>How to Use</h1>
+			<ol>
+				<li>Type in your name.</li>
+				<li>Click on "Go!" button.</li>	
+				<li>Hover over names to see how they are connected to you!</li>
+				<li>Click on other names to see their tree!</li>		
+			</ol>
+			<h3>What Do all the Colors Mean?</h3>
+			<p>Purple = person who's tree has been built.</p>
+			<p>Orange = people directly related to you.</p>
+			<p>Light Blue = people who co-picked up into your tree.</p>
+			<p>Red = Person who is already somewhere else on the tree. Hovering over them will show you where their counterpart is!</p>
+			<button id="closeButton">Close</button>
+		</div>
 		<div id = "svg-container">
 			<div id="load-screen">
 				Loading...
