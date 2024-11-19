@@ -13,7 +13,7 @@ from pyscript import document
 
 # Constants
 MAX_QUEUE_SIZE = 100
-REAL_LINE_CONNECT_COLOR = "red"
+REAL_LINE_CONNECT_COLOR = "#ff9966"
 ANIMATED_GHOST_RECT_OPACITY = 0.9
 
 # Global variables to be used for animations.
