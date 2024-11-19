@@ -71,8 +71,12 @@ body {
 
 /* width = 0.9 container width */
 #tree_name {
-	width: 180px;
-	height: 20px;
+	padding: 0.5rem 1rem;
+	font-family: "Quicksand", sans-serif;
+	border-radius: 10px;
+	border: 1px black solid;
+	width: 30%;
+	font-size: large;
 }
 
 /* width = 0.9 container width */
@@ -90,10 +94,28 @@ body {
 }
 
 #autocomplete-container {
-	position: relative;
-	display: inline-block;
-	width: 200px;
-	padding-bottom: 10px;
+	display: block;
+	padding: 30px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+#testButton {
+	background-color: #153952;
+	border-radius: 10px;
+	border-style: none;
+	color: white;
+	font-family: "Quicksand", sans-serif;
+	font-size: large;
+	padding: 0.5rem 1rem;
+	margin-left: 20px;
+	transition: 0.3s;
+	height: 40.5px;
+}
+
+#testButton:hover {
+	background-color: #91B4CA;
+  	color: #153952;
 }
 
 .autocomplete-item {
