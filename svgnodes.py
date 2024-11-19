@@ -10,10 +10,10 @@ NODE_HEIGHT = 50
 STROKE_WIDTH = 2
 
 CHILD_LINE_COLOR = "black"
-REAL_PARENT_LINE_COLOR = "blue"
-GHOST_PARENT_LINE_COLOR = "green"
+REAL_PARENT_LINE_COLOR = "#ff9933"
+GHOST_PARENT_LINE_COLOR = "gray"
 
-REAL_LINE_CONNECT_COLOR = "red"
+REAL_LINE_CONNECT_COLOR = "#542998"
 
 from draw import x_increments, y_increments, GHOST_LINE_OPACITY
 from pyscript import document
@@ -46,6 +46,7 @@ def make_node(name, color, opacity=1.0):
 		vertical-align: middle; \
 		font-size: 11px; \
 		overflow: hidden; \
+		color: white; \
 	")
 
 	# create text holder

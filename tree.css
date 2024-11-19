@@ -4,7 +4,7 @@
 }
 
 body {
-	background-color: #eeeeee;
+	font-family: "Quicksand", sans-serif;
 }
 
 .SVGanimate {
@@ -24,12 +24,14 @@ body {
 }
 
 #svg-drawing {
-	background-color: bisque;
+	background-color: #FAF9F6;
 	border: 1px black solid;
 	position: absolute;
 	top: 0px;
 	left: 0px;
 	z-index: 0;
+	height: 85vh;
+	width: 99vw;
 }
 
 #load-screen {
@@ -59,11 +61,11 @@ body {
 }
 
 #demo {
-	color: blue;
+	color: black;
 }
 
 .animated-line {
-	color: red;
+	color: gray;
 }
 
 

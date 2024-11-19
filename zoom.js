@@ -6,7 +6,7 @@ const ZOOM_BOX_MULTIPLIER = 0.25
 
 // CHANGE THESE VALUES IF YOU CHANGE THE (container) SIZE
 var defaultWidth = 700;
-var defaultHeight = 400;
+var defaultHeight = 700;
 
 var drawingPosition = drawing.getBoundingClientRect(); // getBoundingClientRect() gives distance from edges of the window. 
 
@@ -20,7 +20,6 @@ var endPoint = {x: 0, y: 0};
 var currentTouchDistance = 0;
 
 document.body.onload = function() {
-	drawing.setAttribute('value', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`)
 	drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
 	checkSize()
 }
@@ -35,20 +34,17 @@ var checkSize = function() {
 	// container.style.height = `${defaultHeight}px`
 };
 
-document.getElementById("svg-drawing").addEventListener("setsvgcenter", ()=>{
-	let data = document.getElementById("svg-drawing").getAttribute("value");
-	console.log(`svg: ${Number(data)}`);
-
+// Event listener for canvas switching event. Used to center the canvas over the new node.
+document.getElementById("svg-drawing").addEventListener("animationiteration", ()=> {
 	checkSize()
 	viewBox.width = defaultWidth
 	viewBox.height = defaultHeight
 	nodes = document.getElementsByClassName("main-root") // get the last node of the class list for most recent main-root
 	mainRoot = nodes[nodes.length-1]
-	viewBox.x = (-1 * defaultWidth / 2) + Number(data);
-	viewBox.y = -1 * defaultHeight / 2;
-	scale = 1;
+	viewBox.x = -1 * defaultWidth / 2 + VIEWBOX_OFFSET
+	viewBox.y = -1 * defaultHeight / 2
+	scale = 1
 	drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-
 })
 
 // ---------- scroll zoom in/out (wheel behavior) ----------

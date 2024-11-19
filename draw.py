@@ -4,10 +4,10 @@
 MAX_QUEUE_SIZE = 100
 
 # Colors
-DEFAULT_COLOR = "orange"
-GHOST_PARENT_COLOR = "#93e0f5"
-NORMAL_GHOST_COLOR = "#f56262"
-ROOT_COLOR = "#b869f0"
+DEFAULT_COLOR = "#296D98"
+GHOST_PARENT_COLOR = "#1A4561"
+NORMAL_GHOST_COLOR = "#1A4561"
+ROOT_COLOR = "#153952"
 
 # Opacities
 GHOST_TEXT_OPACITY = 0.9
@@ -26,7 +26,6 @@ import svgnodes
 
 from collections import deque
 from pyscript import document
-from js import Event
 
 # Draws the subtree of the root given in the tree
 #	Parameters:
@@ -321,7 +320,6 @@ def draw_tree_up(tree, queue, direction, outward_offset):
 # 		parent's tree (2 bigs pick up 2 littles case), it would be extremely
 #		unbalanced. Can be removed if we improve BFS by alternating directions.
 # NOTE Queues have data of [current_person, who_they_came_from]
-# Returns the x position of (person)
 def draw_full_tree(tree, person):
 	# Make root node.
 	tree[person]["visited"] = True
@@ -424,8 +422,6 @@ def draw_full_tree(tree, person):
 		draw_tree_up(tree, rightQueue, direction = +1, outward_offset = starting_x + (1 * x_increments) + total_offset)
 	# DRAW LINES
 	svgnodes.draw_lines(tree, person)
-	
-	return tree[person]["x"]
 
 
 # Gives mouseover behavior to (person)'s node
@@ -447,7 +443,7 @@ def add_click_event(tree, person=None, ghost_dict=None):
 
 # Variables for animation for SVG fading behavior set in a click_event()
 iteration_count = 0
-animation_x = 0
+tree_dict = None
 input_name = None
 
 # Adds event listeners to the svg 
@@ -474,7 +470,7 @@ def click_event(e, tree, person=None, ghost_dict=None):
 		global input_name
 		tree_dict = tree
 		input_name = ghost_dict["name"]
-
+	
 	# Add animation to the svg
 	svg = document.getElementById("svg-drawing")
 	svg.classList.add("SVGanimate")
@@ -482,7 +478,6 @@ def click_event(e, tree, person=None, ghost_dict=None):
 # Switches the tree to the person clicked
 def switchTree(e):
 	global iteration_count
-	global animation_x
 	iteration_count += 1
 	svg = document.getElementById("svg-drawing")
 	if(iteration_count == 1):
@@ -490,12 +485,7 @@ def switchTree(e):
 		svgnodes.removeNodes()
 		resetDict(tree_dict)
 		if(tree_dict != None and input_name != None):
-			animation_x = draw_full_tree(tree_dict, input_name)
-		# set value attribute of drawing for animationiteration event in zoom.js
-		newEvent = Event.new("setsvgcenter")
-		print(f"pyscript says {animation_x}")
-		svg.setAttribute("value", f"{animation_x}")
-		svg.dispatchEvent(newEvent)
+			draw_full_tree(tree_dict, input_name)
 	elif(iteration_count == 2):
 		iteration_count = 0
 		svg.classList.remove("SVGanimate")
