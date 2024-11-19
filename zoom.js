@@ -25,6 +25,18 @@ document.body.onload = function() {
 	checkSize()
 }
 
+// logic for help box
+var helpButton = document.getElementById("helpButton");
+var helpBox = document.getElementById("help-box");
+var closeButton = document.getElementById("closeButton");
+helpButton.onclick = () => {
+	helpBox.style.display="block";
+};
+
+closeButton.onclick = () => {
+	helpBox.style.display = "none";
+};
+
 // this function updates the position and size of the svg, since it can be resized and repositioned.
 var checkSize = function() {
 	defaultWidth = drawing.clientWidth;

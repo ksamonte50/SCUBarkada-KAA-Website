@@ -112,3 +112,16 @@ body {
 	cursor: pointer;
 	background-color: #dddddd;
 }
+
+#help-box {
+	border: solid black 2px;
+	width: 400px;
+	font-family: arial;
+	padding: 6px;
+	margin-bottom: 10px;
+	background-color: #ffffff;
+	display: block;
+}
+#close-button {
+	/*idk*/
+}
