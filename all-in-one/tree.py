@@ -93,6 +93,8 @@ def binarySearch(values, lo, hi, target):
 # Class that holds tree data
 class Tree:
   def __init__(self, input):
+    # Optimization: If our inputted name is already in tree, that means all their
+    # relatives are in the tree, so we don't need to make a new tree.
     self.in_tree = False
     for row in data:
        if(row[0].lower() == input.lower()):
@@ -119,7 +121,6 @@ class Tree:
   #   my_node: Stores the data for the SVG (nodes are lists of [rectangle, text])
   #   lines: Stores the lines that should be highlighted when (input) is being animated.
   def makeTree(self, input):
-    # print(f"treeclass: finding fam of {input}")
 
     # process data for (input)
     row = searchNameForIndex(input)
