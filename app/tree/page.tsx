@@ -9,13 +9,12 @@ export const metadata: Metadata = {
 
 export default function TreePage() {
   return (
-<<<<<<< HEAD
     <div className="relative flex flex-col h-screen w-screen overflow-hidden bg-[#948e79] font-['Cabinet_Grotesk',sans-serif]">
       {/* ── Top Floating Nav Bar v3 (Matches Figma node 133:374) ── */}
       <header className="pt-4 px-4 shrink-0 flex justify-center z-20">
         <nav
           aria-label="Main"
-          className="w-full max-w-[512px] h-[64px] bg-[#3a523a] shadow-[0px_2px_4px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3"
+          className="w-full max-w-[620px] h-[64px] bg-[#3a523a] shadow-[0px_2px_4px_rgba(0,0,0,0.15)] flex items-center justify-between px-5 py-3"
         >
           <div className="flex items-center gap-4">
             <a
@@ -31,20 +30,6 @@ export default function TreePage() {
               About
             </a>
           </div>
-=======
-    <div className="w-full px-4 py-8 sm:px-6">
-      <div className="mb-6 max-w-2xl">
-        <h1
-          className="font-display font-medium tracking-tight text-ink text-h2"
-        >
-          The family tree
-        </h1>
-        <p className="mt-3 text-b1 text-ink/80 font-sans">
-          Search for a name, then hover over anyone to see how you&apos;re
-          connected. Click a name to rebuild the tree around them.
-        </p>
-      </div>
->>>>>>> 34f05cf12d6f3bc014a28b0b1618b3bebef89bfb
 
           <div className="bg-[#a2591f] flex items-center gap-[7px] px-4 py-2 font-['Cabinet_Grotesk',sans-serif] text-[19px] font-medium text-white shadow-sm select-none">
             <span>Tree</span>

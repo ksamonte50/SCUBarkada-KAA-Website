@@ -1,17 +1,8 @@
 @import url("https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
 @import "tailwindcss";
-@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&display=swap');
 
 /*
-<<<<<<< HEAD
- * Design tokens — KAA Style Guide:
- * Beige: #E5DFCC, Mud: #948E79, Green: #3A523A, Dark Green: #1E2A1E, Orange: #A2591F
- */
-:root {
-  --font-cabinet: "Cabinet Grotesk", system-ui, -apple-system, sans-serif;
-  --font-sans: var(--font-cabinet);
-=======
  * Design tokens — derived from the Figma Style Guide (node 20:18).
  *
  * Colors:
@@ -41,7 +32,6 @@
   --font-sans: "Cabinet Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-cabinet: "Cabinet Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
->>>>>>> 34f05cf12d6f3bc014a28b0b1618b3bebef89bfb
 
   /* --- Style Guide Palette ----------------------------------------------- */
   --color-beige: #e5dfcc;
