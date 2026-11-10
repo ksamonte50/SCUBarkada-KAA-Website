@@ -1,20 +1,13 @@
 @import "tailwindcss";
+@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&display=swap');
 
 /*
- * Design tokens — placeholders.
- *
- * Your style guide isn't in yet, so everything visual is driven from the
- * custom properties below. Swapping in the real branding later should only
- * touch this block (plus, eventually, the font declaration).
+ * Design tokens — KAA Style Guide:
+ * Beige: #E5DFCC, Mud: #948E79, Green: #3A523A, Dark Green: #1E2A1E, Orange: #A2591F
  */
 :root {
-  /* --- Font --------------------------------------------------------------
-   * Neutral system stack: zero downloads, no layout shift, no webfont to
-   * remove later. Replace with the style guide font when it arrives —
-   * either point --font-sans at it, or swap this for a next/font call.
-   */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
+  --font-cabinet: "Cabinet Grotesk", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-cabinet);
 
   /* --- Palette ----------------------------------------------------------- */
   /* Warm neutrals for surfaces */
@@ -81,143 +74,80 @@ body {
  * to win on specificity rather than order.
  */
 
-/* Help box: tree.css forces it open on load, but zoom.js toggles it with an
- * inline style, so hiding it here is overridden by Help! and Close. */
+/* Help box */
 body #help-box {
-  display: none;
-  width: min(400px, 100%);
-  border-color: var(--color-border);
+  width: min(480px, 92vw);
   border-radius: 0.75rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-cabinet);
 }
 
-#help-box h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.25;
-  margin-bottom: 0.5rem;
-}
-
-#help-box h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.35rem;
-}
-
-#help-box p {
-  margin-top: 0.35rem;
-  line-height: 1.55;
-}
-
-#help-box ol {
-  list-style: decimal;
-  padding-left: 1.35rem;
-  margin-top: 0.5rem;
-}
-
-#help-box li {
-  margin-top: 0.3rem;
-  line-height: 1.5;
-}
-
-/* Buttons the Python module shows and hides by id */
-#helpButton,
-#testButton,
-#help-box button {
-  font: inherit;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background-color: var(--color-surface);
-  color: var(--color-ink);
-  padding: 0.4rem 0.85rem;
-}
-
-#helpButton:hover,
-#testButton:hover,
-#help-box button:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-/* Zoom controls sit on a dark chip — must stay light-on-dark */
-.zoom-button {
-  font: inherit;
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-  border: 0;
-  background-color: transparent;
-  color: #fff;
-}
-
-.zoom-button:hover {
-  background-color: rgba(255, 255, 255, 0.18);
-}
-
-/* Name search field. tree.css pins it to 20px tall, which clips once real
- * padding and a border are applied — hence the `body` prefix. */
+/* Name search field */
 body #tree_name {
   width: 100%;
-  height: auto;
-  font: inherit;
-  font-size: 0.9rem;
-  color: var(--color-ink);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background-color: var(--color-surface);
-  padding: 0.45rem 0.6rem;
+  height: 100%;
+  font-family: var(--font-cabinet);
+  font-size: 1rem;
+  color: #1e2a1e;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  outline: none;
 }
 
-#tree_name:focus {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
+body #tree_name:focus {
+  outline: none;
 }
 
-/* Autocomplete dropdown — tree.css gives items a fixed 165px width and a
- * background matched to the old page, so stretch them to the field instead. */
+/* Autocomplete dropdown */
 #autocomplete-box {
-  width: 100%;
-  border: 1px solid var(--color-border);
+  position: absolute;
+  bottom: 46px;
+  left: 0;
+  width: 256px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
-  background-color: var(--color-surface);
-  box-shadow: 0 8px 24px rgba(28, 27, 25, 0.12);
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  font-family: var(--font-cabinet);
 }
 
 #autocomplete-box .autocomplete-item {
   width: 100%;
   height: auto;
-  min-height: 32px;
-  background-color: var(--color-surface);
-  color: var(--color-ink);
+  min-height: 36px;
+  padding: 0.5rem 0.75rem;
+  background-color: #ffffff;
+  color: #1e2a1e;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 #autocomplete-box .autocomplete-item:hover {
-  background-color: var(--color-accent-soft);
+  background-color: #f2eee3;
 }
 
-/* The legacy sheet gives #svg-drawing no dimensions, so it falls back to the
- * default 300x150 replaced-element size and the tree renders in a postage
- * stamp. Give the container a real viewport and let the sheet fill it —
- * zoom.js reads clientWidth/clientHeight on every interaction, so it picks
- * the correct size up automatically. */
+/* Tree SVG Canvas Container */
 body #svg-container {
-  height: clamp(520px, 78vh, 920px);
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
+  height: 100%;
+  width: 100%;
+  border: 0;
+  border-radius: 0.875rem;
   overflow: hidden;
-  background-color: var(--color-surface);
+  background-color: #e5dfcc;
+  position: relative;
 }
 
-/* tree.css paints the canvas bisque with a hard black rule; keep the new
- * palette instead (the node colours read fine on white). */
 body #svg-drawing {
   width: 100%;
   height: 100%;
-  background-color: var(--color-surface);
+  background-color: #e5dfcc;
   border: 0;
   cursor: grab;
 }
@@ -226,10 +156,10 @@ body #svg-drawing {
   cursor: grabbing;
 }
 
-/* tree.css centres this with a hardcoded offset sized for the old string */
 body #load-screen {
   left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-sans);
-  color: var(--color-ink-muted);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-cabinet);
+  color: #1e2a1e;
 }

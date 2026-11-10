@@ -19,23 +19,35 @@ var startPoint = {x: 0, y: 0};
 var endPoint = {x: 0, y: 0};
 var currentTouchDistance = 0;
 
-document.body.onload = function() {
-	drawing.setAttribute('value', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`)
-	drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-	checkSize()
+function initDrawing() {
+	if (drawing) {
+		drawing.setAttribute('value', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+		drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+		checkSize();
+	}
+}
+
+if (document.readyState === "complete" || document.readyState === "interactive") {
+	initDrawing();
+} else {
+	window.addEventListener("load", initDrawing);
 }
 
 // logic for help box
 var helpButton = document.getElementById("helpButton");
 var helpBox = document.getElementById("help-box");
 var closeButton = document.getElementById("closeButton");
-helpButton.onclick = () => {
-	helpBox.style.display="block";
-};
+if (helpButton) {
+	helpButton.onclick = () => {
+		if (helpBox) helpBox.style.display="block";
+	};
+}
 
-closeButton.onclick = () => {
-	helpBox.style.display = "none";
-};
+if (closeButton) {
+	closeButton.onclick = () => {
+		if (helpBox) helpBox.style.display = "none";
+	};
+}
 
 // this function updates the position and size of the svg, since it can be resized and repositioned.
 var checkSize = function() {

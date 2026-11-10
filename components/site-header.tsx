@@ -12,6 +12,10 @@ const NAV = [
 export default function SiteHeader() {
   const pathname = usePathname();
 
+  if (pathname === "/tree") {
+    return null;
+  }
+
   /*
    * The Tree page hosts a PyScript interpreter that mutates the document
    * directly and registers window-level listeners. A soft navigation away

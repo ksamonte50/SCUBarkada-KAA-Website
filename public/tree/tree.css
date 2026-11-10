@@ -4,7 +4,7 @@
 }
 
 body {
-	background-color: #eeeeee;
+	background-color: #948e79;
 }
 
 .SVGanimate {
@@ -12,23 +12,24 @@ body {
 	animation-duration: 0.5s;
 	animation-iteration-count: 2;
 	animation-direction: alternate;
-	opacity: 1.0
+	opacity: 1.0;
 }
 
 #svg-container {
-	max-width: 2000px; 
-	margin: auto; 
 	position: relative;
-	/* border: 1px solid red; */
+	width: 100%;
+	height: 100%;
 	display: flex;
 }
 
 #svg-drawing {
-	background-color: bisque;
-	border: 1px black solid;
+	background-color: #e5dfcc;
+	border: none;
 	position: absolute;
 	top: 0px;
 	left: 0px;
+	width: 100%;
+	height: 100%;
 	z-index: 0;
 }
 
@@ -114,13 +115,7 @@ body {
 }
 
 #help-box {
-	border: solid black 2px;
-	width: 400px;
-	font-family: arial;
-	padding: 6px;
-	margin-bottom: 10px;
-	background-color: #ffffff;
-	display: block;
+	display: none;
 }
 #close-button {
 	/*idk*/

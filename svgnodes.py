@@ -5,15 +5,15 @@
 # TODO case with lil 1 1 as root BAD
 
 # Constants
-NODE_WIDTH = 75
-NODE_HEIGHT = 50
+NODE_WIDTH = 180
+NODE_HEIGHT = 55
 STROKE_WIDTH = 2
 
 CHILD_LINE_COLOR = "black"
-REAL_PARENT_LINE_COLOR = "blue"
-GHOST_PARENT_LINE_COLOR = "green"
+REAL_PARENT_LINE_COLOR = "black"
+GHOST_PARENT_LINE_COLOR = "#a2591f"
 
-REAL_LINE_CONNECT_COLOR = "red"
+REAL_LINE_CONNECT_COLOR = "#a2591f"
 
 from draw import x_increments, y_increments, GHOST_LINE_OPACITY
 from pyscript import document
@@ -27,8 +27,8 @@ def make_node(name, color, opacity=1.0):
 	# creates background holder 
 	newElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
 	newElement.setAttribute('fill', f"{color}")
-	newElement.setAttribute('rx', "20")
-	newElement.setAttribute('ry', "20")
+	newElement.setAttribute('rx', "10")
+	newElement.setAttribute('ry', "10")
 	newElement.setAttribute('opacity', f"{opacity}")
 	newElement.setAttribute('width',f"{NODE_WIDTH}px")
 	newElement.setAttribute('height',f"{NODE_HEIGHT}px")
@@ -44,7 +44,13 @@ def make_node(name, color, opacity=1.0):
 	newTextContent.setAttribute("style", f" \
 		display: table-cell; \
 		vertical-align: middle; \
-		font-size: 11px; \
+		font-size: 16px; \
+		font-family: 'Cabinet Grotesk', system-ui, -apple-system, sans-serif; \
+		font-weight: 500; \
+		color: #ffffff; \
+		padding: 0 10px; \
+		line-height: 1.2; \
+		word-break: break-word; \
 		overflow: hidden; \
 	")
 
@@ -56,6 +62,7 @@ def make_node(name, color, opacity=1.0):
 		height: {NODE_HEIGHT}px; \
 		text-align: center; \
 		cursor: pointer; \
+		user-select: none; \
 	")
 
 	# append text to content and content to div holder

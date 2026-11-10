@@ -5,33 +5,15 @@ import { useEffect } from "react";
 /*
  * Tree module host.
  *
- * The Python/JS/CSS that draws the tree is legacy code and must not be
- * modified. It reaches into the DOM by fixed id (see index.html in the repo
- * root), so this component reproduces that markup byte-for-byte and then
- * loads the runtime around it.
- *
- * Everything is injected imperatively in useEffect, in the same order the
- * original page used:
- *
- *   1. <mpy-config> + <script type="mpy">   (inert until PyScript boots)
- *   2. zoom.js                              (classic, ran during parse)
- *   3. pyscript core.js                     (module, deferred to the end)
- *
- * Injecting after mount guarantees the mpy elements already exist before
- * core.js evaluates. The guard stops React Strict Mode's double effect from
- * booting PyScript twice — note we deliberately never remove these on
- * unmount: removing the tags cannot un-evaluate core.js, and re-adding it
- * on a later mount would start a second interpreter.
- *
- * Navigating to/from /tree always uses a full page load (see site-header),
- * so the whole PyScript document is torn down on the way out.
+ * Reproduces the required legacy DOM elements by fixed id so PyScript and
+ * zoom.js can bind to them properly while matching the new Figma design.
  */
 
 const PYSCRIPT_BASE = "https://pyscript.net/releases/2024.7.1";
 
 /* Absolute paths: /tree has no trailing slash, so a relative "app.py" would
  * resolve to /app.py instead of /tree/app.py. Empty destination = basename
- * in the root of PyScript's virtual filesystem, exactly as before. */
+ * in the root of PyScript's virtual filesystem. */
 const MPY_CONFIG = `{
   "files": {
     "/tree/app.py": "",
@@ -80,7 +62,7 @@ function bootTreeRuntime() {
   loadStylesheet(`${PYSCRIPT_BASE}/core.css`);
   loadStylesheet("/tree/tree.css");
 
-  // 3. zoom.js before core.js, matching the original document order.
+  // 3. zoom.js before core.js, matching document order.
   loadScript({ src: "/tree/zoom.js" });
   loadScript({ src: `${PYSCRIPT_BASE}/core.js`, type: "module" });
 }
@@ -88,72 +70,175 @@ function bootTreeRuntime() {
 export default function TreeModule() {
   useEffect(() => {
     bootTreeRuntime();
+
+    // Keydown listener on search input to trigger tree creation on Enter
+    const input = document.getElementById("tree_name") as HTMLInputElement | null;
+    const testBtn = document.getElementById("testButton") as HTMLButtonElement | null;
+    if (!input || !testBtn) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        testBtn.click();
+      }
+    };
+    input.addEventListener("keydown", handleKeyDown);
+    return () => input.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return (
-    <>
-      {/* ── Controls ──────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div id="autocomplete-container">
-          <input
-            type="text"
-            id="tree_name"
-            placeholder="Type a name here..."
-            autoComplete="off"
-          />
-        </div>
-        <button type="button" id="testButton" style={{ display: "none" }}>
-          Click!
+    <div
+      id="svg-container"
+      className="relative w-full h-full bg-[#e5dfcc] rounded-xl overflow-hidden shadow-sm flex flex-col"
+    >
+      {/* ── Loading Screen ── */}
+      <div
+        id="load-screen"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 font-['Cabinet_Grotesk',sans-serif] text-2xl font-medium text-[#1e2a1e] tracking-wide pointer-events-none"
+      >
+        Loading...
+      </div>
+
+      {/* ── Zoom Controls (Figma buttons top right) ── */}
+      <div
+        id="zoom-box-new"
+        className="absolute top-5 right-5 z-10 flex items-center gap-2.5"
+      >
+        <button
+          type="button"
+          id="plus-zoom"
+          className="size-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-xl font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] transition-colors cursor-pointer"
+          title="Zoom In"
+        >
+          +
         </button>
-        <button type="button" id="helpButton">
-          Help!
+        <button
+          type="button"
+          id="minus-zoom"
+          className="size-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-xl font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] transition-colors cursor-pointer"
+          title="Zoom Out"
+        >
+          -
         </button>
       </div>
 
-      {/* ── Help box (hidden by default; Help!/Close toggle it) ───── */}
-      <div id="help-box">
-        <h1>How to Use</h1>
-        <ol>
-          <li>Type in your name.</li>
-          <li>Click on &quot;Go!&quot; button.</li>
-          <li>Hover over names to see how they are connected to you!</li>
-          <li>Click on other names to see their tree!</li>
+      {/* ── Search & Help Controls (Figma bottom center) ── */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
+        {/* Search bar container */}
+        <div id="autocomplete-container" className="relative w-[256px]">
+          <div className="w-[256px] h-10 bg-white shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] flex items-center px-2.5 gap-2.5">
+            <img
+              src="/icons/search.svg"
+              alt=""
+              width={18}
+              height={18}
+              className="size-[18px] shrink-0 opacity-60"
+            />
+            <input
+              type="text"
+              id="tree_name"
+              placeholder="Search..."
+              autoComplete="off"
+              className="w-full h-full bg-transparent border-0 outline-none font-['Cabinet_Grotesk',sans-serif] text-base font-medium text-[#1e2a1e] placeholder:text-black/30"
+            />
+          </div>
+        </div>
+
+        {/* Hidden button triggered to build the tree */}
+        <button type="button" id="testButton" style={{ display: "none" }}>
+          Click!
+        </button>
+
+        {/* Help button */}
+        <button
+          type="button"
+          id="helpButton"
+          className="size-10 min-w-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-[19px] font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] transition-colors cursor-pointer"
+          title="Help"
+        >
+          ?
+        </button>
+      </div>
+
+      {/* ── Help Box Modal ── */}
+      <div
+        id="help-box"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[90%] max-w-[480px] bg-white rounded-xl shadow-2xl p-6 border border-[#948e79]/30 font-['Cabinet_Grotesk',sans-serif]"
+        style={{ display: "none" }}
+      >
+        <div className="flex items-center justify-between pb-3 border-b border-[#e5dfcc]">
+          <h2 className="text-2xl font-bold text-[#1e2a1e]">How to Use</h2>
+          <button
+            type="button"
+            id="closeButton"
+            className="text-xl text-[#948e79] hover:text-[#1e2a1e] font-bold px-2 py-1 cursor-pointer transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+
+        <ol className="mt-4 space-y-2 text-sm text-[#1e2a1e]/90 list-decimal pl-5">
+          <li>Type a name into the search bar and select or press Enter.</li>
+          <li>Hover over any name to see how they connect to you.</li>
+          <li>Click any person on the tree to rebuild the tree around them.</li>
         </ol>
-        <h3>What Do all the Colors Mean?</h3>
-        <p>Purple = person who&apos;s tree has been built.</p>
-        <p>Orange = people directly related to you.</p>
-        <p>Light Blue = people who co-picked up into your tree.</p>
-        <p>
-          Red = Person who is already somewhere else on the tree. Hovering over
-          them will show you where their counterpart is!
-        </p>
-        <button type="button" id="closeButton">
+
+        <h3 className="mt-5 text-base font-bold text-[#1e2a1e] border-t border-[#e5dfcc] pt-3">
+          What Do All the Colors Mean?
+        </h3>
+        <div className="mt-3 space-y-2 text-sm">
+          <div className="flex items-center gap-2.5">
+            <span className="size-4 rounded-[4px] bg-[#1e2a1e] shrink-0" />
+            <span className="text-[#1e2a1e]">
+              <strong className="font-semibold">Dark Green:</strong> Selected tree root
+            </span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="size-4 rounded-[4px] bg-[#3a523a] shrink-0" />
+            <span className="text-[#1e2a1e]">
+              <strong className="font-semibold">Forest Green:</strong> Direct relatives
+            </span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="size-4 rounded-[4px] bg-[#a2591f] shrink-0" />
+            <span className="text-[#1e2a1e]">
+              <strong className="font-semibold">Rust Orange:</strong> Co-pickups
+            </span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="size-4 rounded-[4px] bg-[#948e79] shrink-0" />
+            <span className="text-[#1e2a1e]">
+              <strong className="font-semibold">Mud Taupe:</strong> Appears elsewhere on tree
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const hb = document.getElementById("help-box");
+            if (hb) hb.style.display = "none";
+          }}
+          className="mt-6 w-full py-2.5 bg-[#1e2a1e] hover:bg-[#2e3e2e] text-white font-medium rounded-lg transition-colors cursor-pointer"
+        >
           Close
         </button>
       </div>
 
-      {/* ── Canvas ────────────────────────────────────────────────── */}
-      <div id="svg-container">
-        <div id="load-screen">Loading...</div>
-        <div id="zoom-box">
-          <button type="button" className="zoom-button" id="plus-zoom">
-            +
-          </button>
-          <button type="button" className="zoom-button" id="minus-zoom">
-            -
-          </button>
-        </div>
-        <svg id="svg-drawing">
-          <defs id="defs">
-            <filter id="shadow" width="125" height="125">
-              <feDropShadow dx="0" dy="4" stdDeviation="2.5" />
-            </filter>
-            <filter id="line-shadow" width="125" height="125">
-              <feDropShadow dx="2" dy="4" stdDeviation="2.5" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
-    </>
+      {/* ── SVG Drawing Canvas ── */}
+      <svg
+        id="svg-drawing"
+        className="w-full h-full bg-[#e5dfcc] cursor-grab active:cursor-grabbing block"
+      >
+        <defs id="defs">
+          <filter id="shadow" width="125%" height="125%">
+            <feDropShadow dx="0" dy="4" stdDeviation="2.5" />
+          </filter>
+          <filter id="line-shadow" width="125%" height="125%">
+            <feDropShadow dx="2" dy="4" stdDeviation="2.5" />
+          </filter>
+        </defs>
+      </svg>
+    </div>
   );
 }

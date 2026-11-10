@@ -102,6 +102,9 @@ def click_option(event):
 		print(name)
 		document.getElementById("tree_name").value = name
 		clear_autocomplete()
+		btn = document.getElementById("testButton")
+		if(btn != None):
+			btn.click()
 
 def clear_autocomplete(e=None):
 	document.body.removeEventListener("click", clear_autocomplete)

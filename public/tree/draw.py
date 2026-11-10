@@ -4,19 +4,19 @@
 MAX_QUEUE_SIZE = 100
 
 # Colors
-DEFAULT_COLOR = "orange"
-GHOST_PARENT_COLOR = "#93e0f5"
-NORMAL_GHOST_COLOR = "#f56262"
-ROOT_COLOR = "#b869f0"
+DEFAULT_COLOR = "#3a523a"
+GHOST_PARENT_COLOR = "#a2591f"
+NORMAL_GHOST_COLOR = "#948e79"
+ROOT_COLOR = "#1e2a1e"
 
 # Opacities
-GHOST_TEXT_OPACITY = 0.9
-GHOST_RECT_OPACITY = 0.6
-GHOST_LINE_OPACITY = 0.7
+GHOST_TEXT_OPACITY = 1.0
+GHOST_RECT_OPACITY = 1.0
+GHOST_LINE_OPACITY = 1.0
 
 # Determines distances between nodes on trees
-x_increments = 100 
-y_increments = 100 
+x_increments = 220 
+y_increments = 120 
 
 # Global Variable used throughout code
 main_root = None
@@ -329,6 +329,7 @@ def draw_full_tree(tree, person):
 	tree[person]["y"] = 0
 	html_node = svgnodes.make_node(person, f"{ROOT_COLOR}")
 	html_node[0].setAttribute("class", "main-root")
+	html_node[0].setAttribute("filter", "url(#shadow)")
 	tree[person]["my_node"] = html_node
 	tree[person]["top_big"] = True
 	add_real_mouseover_event(tree, person)
@@ -458,6 +459,9 @@ def prepare_svg():
 
 # On a click, make a new tree with clicked person as the root.
 def click_event(e, tree, person=None, ghost_dict=None):
+	global tree_dict
+	global input_name
+
 	# Checks done for mobile compatibility
 	if(e != None):
 		e.preventDefault()
@@ -465,13 +469,9 @@ def click_event(e, tree, person=None, ghost_dict=None):
 
 	# Set variables to be used by switchTree().
 	if(ghost_dict == None):
-		global tree_dict
-		global input_name
 		tree_dict = tree
 		input_name = person
 	else:
-		global tree_dict
-		global input_name
 		tree_dict = tree
 		input_name = ghost_dict["name"]
 
