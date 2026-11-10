@@ -1,258 +1,178 @@
-// svg-drawing is an svg
+// svg-drawing zoom & pan controller
 const container = document.getElementById("svg-container");
 const drawing = document.getElementById("svg-drawing");
-const VIEWBOX_OFFSET = 150
-const ZOOM_BOX_MULTIPLIER = 0.25
+const VIEWBOX_OFFSET = 150;
+const ZOOM_BOX_MULTIPLIER = 0.25;
 
-// CHANGE THESE VALUES IF YOU CHANGE THE (container) SIZE
 var defaultWidth = 700;
 var defaultHeight = 400;
 
-var drawingPosition = drawing.getBoundingClientRect(); // getBoundingClientRect() gives distance from edges of the window. 
+var drawingPosition = drawing
+  ? drawing.getBoundingClientRect()
+  : { left: 0, top: 0, width: defaultWidth, height: defaultHeight };
 
-var viewBox = {x: 0, y: 0, width: defaultWidth, height: defaultHeight};
-
+var viewBox = { x: -defaultWidth / 2, y: -defaultHeight / 2, width: defaultWidth, height: defaultHeight };
 var scale = 1;
-// movement variables
 var isPanning = false;
-var startPoint = {x: 0, y: 0};
-var endPoint = {x: 0, y: 0};
-var currentTouchDistance = 0;
+var startPoint = { x: 0, y: 0 };
+var startViewBox = { x: 0, y: 0, width: defaultWidth, height: defaultHeight };
+var hasDragged = false;
+
+function checkSize() {
+  if (!drawing) return;
+  const rect = drawing.getBoundingClientRect();
+  defaultWidth = rect.width || drawing.clientWidth || 700;
+  defaultHeight = rect.height || drawing.clientHeight || 400;
+  scale = defaultWidth / (viewBox.width || defaultWidth);
+  drawingPosition = rect;
+}
 
 function initDrawing() {
-	if (drawing) {
-		drawing.setAttribute('value', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-		drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-		checkSize();
-	}
+  if (drawing) {
+    checkSize();
+    viewBox.width = defaultWidth;
+    viewBox.height = defaultHeight;
+    viewBox.x = -defaultWidth / 2;
+    viewBox.y = -defaultHeight / 2;
+    drawing.setAttribute("value", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+    drawing.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+  }
 }
 
 if (document.readyState === "complete" || document.readyState === "interactive") {
-	initDrawing();
+  initDrawing();
 } else {
-	window.addEventListener("load", initDrawing);
+  window.addEventListener("load", initDrawing);
 }
 
-// logic for help box
+// Help box logic
 var helpButton = document.getElementById("helpButton");
 var helpBox = document.getElementById("help-box");
 var closeButton = document.getElementById("closeButton");
 if (helpButton) {
-	helpButton.onclick = () => {
-		if (helpBox) helpBox.style.display="block";
-	};
+  helpButton.onclick = () => {
+    if (helpBox) helpBox.style.display = "block";
+  };
 }
-
 if (closeButton) {
-	closeButton.onclick = () => {
-		if (helpBox) helpBox.style.display = "none";
-	};
+  closeButton.onclick = () => {
+    if (helpBox) helpBox.style.display = "none";
+  };
 }
 
-// this function updates the position and size of the svg, since it can be resized and repositioned.
-var checkSize = function() {
-	defaultWidth = drawing.clientWidth;
-	defaultHeight = drawing.clientHeight;
-	
-	scale = defaultWidth / viewBox.width;
-	drawingPosition = drawing.getBoundingClientRect();
-	// container.style.height = `${defaultHeight}px`
-};
-
-document.getElementById("svg-drawing").addEventListener("setsvgcenter", ()=>{
-	let data = document.getElementById("svg-drawing").getAttribute("value");
-	console.log(`svg: ${Number(data)}`);
-
-	checkSize()
-	viewBox.width = defaultWidth
-	viewBox.height = defaultHeight
-	nodes = document.getElementsByClassName("main-root") // get the last node of the class list for most recent main-root
-	mainRoot = nodes[nodes.length-1]
-	viewBox.x = (-1 * defaultWidth / 2) + Number(data);
-	viewBox.y = -1 * defaultHeight / 2;
-	scale = 1;
-	drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-
-})
-
-// ---------- scroll zoom in/out (wheel behavior) ----------
-drawing.onwheel = function(e) {
-	checkSize();
-	e.preventDefault(); // prevents the scrolling behavior of mousewheel
-	if(!isPanning) {
-		let mouseX = e.clientX - drawingPosition.left;
-		let mouseY = e.clientY - drawingPosition.top;
-
-		let deltaW = viewBox.width * Math.sign(e.deltaY) * 0.05;
-		let deltaH = viewBox.height * Math.sign(e.deltaY) * 0.05;
-		let deltaX = deltaW * mouseX / defaultWidth;
-		let deltaY = deltaH * mouseY / defaultHeight;
-
-		viewBox = {
-			x: viewBox.x + deltaX, 
-			y: viewBox.y + deltaY, 
-			width: viewBox.width - deltaW, 
-			height: viewBox.height - deltaH
-		};
-
-		scale = defaultWidth / viewBox.width;
-
-		drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-	}
+if (drawing) {
+  drawing.addEventListener("setsvgcenter", () => {
+    let data = drawing.getAttribute("value");
+    checkSize();
+    viewBox.width = defaultWidth;
+    viewBox.height = defaultHeight;
+    viewBox.x = -defaultWidth / 2 + (Number(data) || 0);
+    viewBox.y = -defaultHeight / 2;
+    scale = 1;
+    drawing.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+  });
 }
 
-// ---------- scroll zoom in/out (zoom box) ----------
-document.getElementById("plus-zoom").onclick = function(e) {
-	e.preventDefault()
-	checkSize();
-	if(!isPanning) {
-		let mouseX = (viewBox.width / 2) + drawingPosition.left;
-		let mouseY = (viewBox.height / 2) + drawingPosition.top;
+function zoomBy(factor, clientX, clientY) {
+  if (!drawing) return;
+  checkSize();
+  const targetW = viewBox.width * factor;
+  const targetH = viewBox.height * factor;
+  if (targetW < 80 || targetW > 50000) return;
 
-		let deltaW = viewBox.width * ZOOM_BOX_MULTIPLIER;
-		let deltaH = viewBox.height * ZOOM_BOX_MULTIPLIER;
-		let deltaX = deltaW * mouseX / defaultWidth;
-		let deltaY = deltaH * mouseY / defaultHeight;
+  const rect = drawing.getBoundingClientRect();
+  const screenX = clientX !== undefined ? clientX - rect.left : rect.width / 2;
+  const screenY = clientY !== undefined ? clientY - rect.top : rect.height / 2;
 
-		viewBox = {
-			x: viewBox.x + deltaX, 
-			y: viewBox.y + deltaY, 
-			width: viewBox.width - deltaW, 
-			height: viewBox.height - deltaH
-		};
+  const fracX = Math.max(0, Math.min(1, screenX / (rect.width || defaultWidth)));
+  const fracY = Math.max(0, Math.min(1, screenY / (rect.height || defaultHeight)));
 
-		scale = defaultWidth / viewBox.width;
+  const anchorX = viewBox.x + fracX * viewBox.width;
+  const anchorY = viewBox.y + fracY * viewBox.height;
 
-		drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-	}
+  viewBox = {
+    x: anchorX - fracX * targetW,
+    y: anchorY - fracY * targetH,
+    width: targetW,
+    height: targetH,
+  };
+  scale = defaultWidth / viewBox.width;
+  drawing.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
 }
 
-document.getElementById("minus-zoom").onclick = function(e) {
-	e.preventDefault()
-	checkSize();
-	if(!isPanning) {
-		let mouseX = (viewBox.width / 2) + drawingPosition.left;
-		let mouseY = (viewBox.height / 2) + drawingPosition.top;
-
-		let deltaW = viewBox.width * -2 * ZOOM_BOX_MULTIPLIER;
-		let deltaH = viewBox.height * -2 * ZOOM_BOX_MULTIPLIER;
-		let deltaX = deltaW * mouseX / defaultWidth;
-		let deltaY = deltaH * mouseY / defaultHeight;
-
-		viewBox = {
-			x: viewBox.x + deltaX, 
-			y: viewBox.y + deltaY, 
-			width: viewBox.width - deltaW, 
-			height: viewBox.height - deltaH
-		};
-
-		scale = defaultWidth / viewBox.width;
-
-		drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-	}
+// Zoom controls (+ / -)
+var plusBtn = document.getElementById("plus-zoom");
+if (plusBtn) {
+  plusBtn.onclick = function (e) {
+    e.preventDefault();
+    zoomBy(0.8);
+  };
 }
 
-// ----------- moving the svg (mouse down/up/move/leave behavior) ------------
-var mousedown = function(e) {
-	checkSize();
-	isPanning = true;
-	startPoint = {x: e.clientX, y: e.clientY};	
+var minusBtn = document.getElementById("minus-zoom");
+if (minusBtn) {
+  minusBtn.onclick = function (e) {
+    e.preventDefault();
+    zoomBy(1.25);
+  };
 }
 
-var mousemove = function(e) {
-	if (isPanning) {
-		endPoint = {
-			x: e.clientX, 
-			y: e.clientY
-		};
-		let dx = (startPoint.x - endPoint.x) / scale;
-		let dy = (startPoint.y - endPoint.y) / scale;
-		let movedViewBox = {
-			x: viewBox.x + dx,
-			y: viewBox.y + dy,
-			width: viewBox.width,
-			height: viewBox.height
-		}
-		drawing.setAttribute('viewBox', `${movedViewBox.x} ${movedViewBox.y} ${movedViewBox.width} ${movedViewBox.height}`);
-	}
+// Mouse wheel zoom
+if (drawing) {
+  drawing.addEventListener(
+    "wheel",
+    function (e) {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 0.9 : 1.1;
+      zoomBy(factor, e.clientX, e.clientY);
+    },
+    { passive: false }
+  );
 }
 
-var mouseup = function(e) {
-	if(isPanning) {
-		endPoint = {
-			x: e.clientX, 
-			y: e.clientY
-		};
-		let dx = (startPoint.x - endPoint.x) / scale;
-		let dy = (startPoint.y - endPoint.y) / scale;
-		viewBox.x += dx;
-		viewBox.y += dy;
-		drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-		isPanning = false;
-	}
-}
+// Mouse drag pan
+if (drawing) {
+  drawing.addEventListener("mousedown", function (e) {
+    if (e.button !== 0) return;
+    checkSize();
+    isPanning = true;
+    hasDragged = false;
+    startPoint = { x: e.clientX, y: e.clientY };
+    startViewBox = { ...viewBox };
+  });
 
-var mouseleave = function(e) {
-	if(isPanning) {
-		endPoint = {
-			x: e.clientX, 
-			y: e.clientY
-		};
-		let dx = (startPoint.x - endPoint.x) / scale;
-		let dy = (startPoint.y - endPoint.y) / scale;
-		viewBox.x += dx;
-		viewBox.y += dy;
-		drawing.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-	}
-	isPanning = false;
-}
+  window.addEventListener("mousemove", function (e) {
+    if (!isPanning || !drawing) return;
+    const dxScreen = e.clientX - startPoint.x;
+    const dyScreen = e.clientY - startPoint.y;
+    if (Math.hypot(dxScreen, dyScreen) > 4) {
+      hasDragged = true;
+    }
+    const rect = drawing.getBoundingClientRect();
+    const unitsPerPxX = startViewBox.width / (rect.width || defaultWidth);
+    const unitsPerPxY = startViewBox.height / (rect.height || defaultHeight);
+    viewBox = {
+      x: startViewBox.x - dxScreen * unitsPerPxX,
+      y: startViewBox.y - dyScreen * unitsPerPxY,
+      width: startViewBox.width,
+      height: startViewBox.height,
+    };
+    drawing.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+  });
 
-drawing.onmousedown = (e) => {
-	e.preventDefault()
-	mousedown(e)
-}
+  window.addEventListener("mouseup", function () {
+    isPanning = false;
+  });
 
-drawing.onmousemove = (e) => {
-	e.preventDefault()
-	mousemove(e)
-}
-
-drawing.onmouseup = (e) => {
-	e.preventDefault()
-	mouseup(e)
-}
-
-drawing.onmouseleave = (e) => {
-	e.preventDefault()
-	mouseleave(e)
-}
-
-var currentTouch;
-var currentMovedTouch;
-
-drawing.ontouchstart = (e) => {
-	currentTouch = e.touches[0]
-	currentMovedTouch = e.changedTouches[0]
-	e.stopPropagation()
-	e.preventDefault()
-	mousedown(e.touches[0]);
-}
-
-drawing.ontouchmove = (e) => {
-	e.stopPropagation()
-	e.preventDefault()
-	currentMovedTouch = e.changedTouches[0]
-	mousemove(currentMovedTouch)
-}
-
-drawing.ontouchend = (e) => {
-	e.stopPropagation()
-	e.preventDefault()
-	mouseup(currentMovedTouch)
-}
-
-drawing.ontouchcancel = (e) => {
-	e.stopPropagation()
-	e.preventDefault()
-	mouseleave(currentMovedTouch)
+  drawing.addEventListener(
+    "click",
+    function (e) {
+      if (hasDragged) {
+        e.stopPropagation();
+        e.preventDefault();
+        hasDragged = false;
+      }
+    },
+    true
+  );
 }

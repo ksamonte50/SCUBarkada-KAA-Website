@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 /*
  * Tree module host.
  *
- * Reproduces the required legacy DOM elements by fixed id so PyScript and
- * zoom.js can bind to them properly while matching the new Figma design.
+ * Reproduces the required legacy DOM elements by fixed id so PyScript
+ * can bind to them properly while matching the new Figma design.
+ * Zoom, pan, and centering are managed natively to guarantee reliable
+ * behavior across React renders, strict mode, and responsive resizes.
  */
 
 const PYSCRIPT_BASE = "https://pyscript.net/releases/2024.7.1";
@@ -62,29 +64,318 @@ function bootTreeRuntime() {
   loadStylesheet(`${PYSCRIPT_BASE}/core.css`);
   loadStylesheet("/tree/tree.css");
 
-  // 3. zoom.js before core.js, matching document order.
-  loadScript({ src: "/tree/zoom.js" });
+  // 3. PyScript runtime core
   loadScript({ src: `${PYSCRIPT_BASE}/core.js`, type: "module" });
 }
 
+interface ViewBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export default function TreeModule() {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const viewBoxRef = useRef<ViewBox>({ x: -400, y: -300, width: 800, height: 600 });
+  const isPanningRef = useRef(false);
+  const startPointerRef = useRef({ x: 0, y: 0 });
+  const startViewBoxRef = useRef<ViewBox>({ x: -400, y: -300, width: 800, height: 600 });
+  const hasDraggedRef = useRef(false);
+
+  const touchDistRef = useRef(0);
+  const touchMidRef = useRef({ x: 0, y: 0 });
+
+  const applyViewBox = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const vb = viewBoxRef.current;
+    svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+    svg.setAttribute("value", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+  }, []);
+
+  const zoomAtPoint = useCallback(
+    (factor: number, clientX?: number, clientY?: number) => {
+      const svg = svgRef.current;
+      if (!svg) return;
+      const rect = svg.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const cur = viewBoxRef.current;
+      const MIN_WIDTH = 80;
+      const MAX_WIDTH = 50000;
+      const targetWidth = cur.width * factor;
+      if (targetWidth < MIN_WIDTH || targetWidth > MAX_WIDTH) return;
+      const targetHeight = cur.height * factor;
+
+      const screenX = clientX !== undefined ? clientX - rect.left : rect.width / 2;
+      const screenY = clientY !== undefined ? clientY - rect.top : rect.height / 2;
+
+      const fracX = Math.max(0, Math.min(1, screenX / rect.width));
+      const fracY = Math.max(0, Math.min(1, screenY / rect.height));
+
+      const anchorX = cur.x + fracX * cur.width;
+      const anchorY = cur.y + fracY * cur.height;
+
+      viewBoxRef.current = {
+        x: anchorX - fracX * targetWidth,
+        y: anchorY - fracY * targetHeight,
+        width: targetWidth,
+        height: targetHeight,
+      };
+      applyViewBox();
+    },
+    [applyViewBox]
+  );
+
+  const handleZoomIn = useCallback(
+    (e?: React.MouseEvent | MouseEvent) => {
+      e?.preventDefault();
+      zoomAtPoint(0.8);
+    },
+    [zoomAtPoint]
+  );
+
+  const handleZoomOut = useCallback(
+    (e?: React.MouseEvent | MouseEvent) => {
+      e?.preventDefault();
+      zoomAtPoint(1.25);
+    },
+    [zoomAtPoint]
+  );
+
   useEffect(() => {
     bootTreeRuntime();
 
-    // Keydown listener on search input to trigger tree creation on Enter
+    const svg = svgRef.current || (document.getElementById("svg-drawing") as SVGSVGElement | null);
+    if (!svg) return;
+
+    // Initialize viewBox to match current canvas size, centered at (0, 0)
+    const rect = svg.getBoundingClientRect();
+    const w = rect.width || 800;
+    const h = rect.height || 600;
+    viewBoxRef.current = {
+      x: -w / 2,
+      y: -h / 2,
+      width: w,
+      height: h,
+    };
+    applyViewBox();
+
+    // ── PyScript tree centering event listener ──
+    const handleSetSvgCenter = () => {
+      const r = svg.getBoundingClientRect();
+      const width = r.width || viewBoxRef.current.width || 800;
+      const height = r.height || viewBoxRef.current.height || 600;
+      const rawVal = svg.getAttribute("value");
+      const rootX = Number(rawVal) || 0;
+
+      viewBoxRef.current = {
+        x: -width / 2 + rootX,
+        y: -height / 2,
+        width,
+        height,
+      };
+      applyViewBox();
+    };
+    svg.addEventListener("setsvgcenter", handleSetSvgCenter);
+
+    // ── Mouse wheel zoom centered under cursor ──
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 0.9 : 1.1;
+      zoomAtPoint(factor, e.clientX, e.clientY);
+    };
+    svg.addEventListener("wheel", handleWheel, { passive: false });
+
+    // ── Mouse drag pan ──
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      isPanningRef.current = true;
+      hasDraggedRef.current = false;
+      startPointerRef.current = { x: e.clientX, y: e.clientY };
+      startViewBoxRef.current = { ...viewBoxRef.current };
+    };
+    svg.addEventListener("mousedown", handleMouseDown);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPanningRef.current) return;
+      const r = svg.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+
+      const dxScreen = e.clientX - startPointerRef.current.x;
+      const dyScreen = e.clientY - startPointerRef.current.y;
+
+      if (Math.hypot(dxScreen, dyScreen) > 4) {
+        hasDraggedRef.current = true;
+      }
+
+      const startVb = startViewBoxRef.current;
+      const unitsPerPxX = startVb.width / r.width;
+      const unitsPerPxY = startVb.height / r.height;
+
+      viewBoxRef.current = {
+        x: startVb.x - dxScreen * unitsPerPxX,
+        y: startVb.y - dyScreen * unitsPerPxY,
+        width: startVb.width,
+        height: startVb.height,
+      };
+      applyViewBox();
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+
+    const handleMouseUp = () => {
+      isPanningRef.current = false;
+    };
+    window.addEventListener("mouseup", handleMouseUp);
+
+    // Suppress node click event if user was dragging/panning
+    const handleClickCapture = (e: MouseEvent) => {
+      if (hasDraggedRef.current) {
+        e.stopPropagation();
+        e.preventDefault();
+        hasDraggedRef.current = false;
+      }
+    };
+    svg.addEventListener("click", handleClickCapture, true);
+
+    // ── Touch pan & pinch-to-zoom ──
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        isPanningRef.current = true;
+        hasDraggedRef.current = false;
+        startPointerRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        startViewBoxRef.current = { ...viewBoxRef.current };
+      } else if (e.touches.length === 2) {
+        isPanningRef.current = false;
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        touchDistRef.current = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        touchMidRef.current = {
+          x: (t1.clientX + t2.clientX) / 2,
+          y: (t1.clientY + t2.clientY) / 2,
+        };
+        startViewBoxRef.current = { ...viewBoxRef.current };
+      }
+    };
+    svg.addEventListener("touchstart", handleTouchStart, { passive: false });
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const r = svg.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+
+      if (e.touches.length === 1 && isPanningRef.current) {
+        e.preventDefault();
+        const dxScreen = e.touches[0].clientX - startPointerRef.current.x;
+        const dyScreen = e.touches[0].clientY - startPointerRef.current.y;
+
+        if (Math.hypot(dxScreen, dyScreen) > 4) {
+          hasDraggedRef.current = true;
+        }
+
+        const startVb = startViewBoxRef.current;
+        const unitsPerPxX = startVb.width / r.width;
+        const unitsPerPxY = startVb.height / r.height;
+
+        viewBoxRef.current = {
+          x: startVb.x - dxScreen * unitsPerPxX,
+          y: startVb.y - dyScreen * unitsPerPxY,
+          width: startVb.width,
+          height: startVb.height,
+        };
+        applyViewBox();
+      } else if (e.touches.length === 2 && touchDistRef.current > 0) {
+        e.preventDefault();
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const newDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        if (newDist < 10) return;
+        const scaleRatio = touchDistRef.current / newDist;
+
+        const startVb = startViewBoxRef.current;
+        const newWidth = startVb.width * scaleRatio;
+        const newHeight = startVb.height * scaleRatio;
+
+        const mid = touchMidRef.current;
+        const fracX = (mid.x - r.left) / r.width;
+        const fracY = (mid.y - r.top) / r.height;
+
+        const anchorX = startVb.x + fracX * startVb.width;
+        const anchorY = startVb.y + fracY * startVb.height;
+
+        viewBoxRef.current = {
+          x: anchorX - fracX * newWidth,
+          y: anchorY - fracY * newHeight,
+          width: newWidth,
+          height: newHeight,
+        };
+        applyViewBox();
+      }
+    };
+    svg.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0) {
+        isPanningRef.current = false;
+        touchDistRef.current = 0;
+      } else if (e.touches.length === 1) {
+        isPanningRef.current = true;
+        touchDistRef.current = 0;
+        startPointerRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        startViewBoxRef.current = { ...viewBoxRef.current };
+      }
+    };
+    svg.addEventListener("touchend", handleTouchEnd);
+    svg.addEventListener("touchcancel", handleTouchEnd);
+
+    // ── Window resize: preserve aspect ratio smoothly ──
+    const handleResize = () => {
+      const r = svg.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const cur = viewBoxRef.current;
+      const newHeight = cur.width * (r.height / r.width);
+      const diffH = newHeight - cur.height;
+      viewBoxRef.current = {
+        ...cur,
+        y: cur.y - diffH / 2,
+        height: newHeight,
+      };
+      applyViewBox();
+    };
+    window.addEventListener("resize", handleResize);
+
+    // ── Search Enter keydown listener ──
     const input = document.getElementById("tree_name") as HTMLInputElement | null;
     const testBtn = document.getElementById("testButton") as HTMLButtonElement | null;
-    if (!input || !testBtn) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        testBtn.click();
+        testBtn?.click();
       }
     };
-    input.addEventListener("keydown", handleKeyDown);
-    return () => input.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    if (input) {
+      input.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      svg.removeEventListener("setsvgcenter", handleSetSvgCenter);
+      svg.removeEventListener("wheel", handleWheel);
+      svg.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      svg.removeEventListener("click", handleClickCapture, true);
+      svg.removeEventListener("touchstart", handleTouchStart);
+      svg.removeEventListener("touchmove", handleTouchMove);
+      svg.removeEventListener("touchend", handleTouchEnd);
+      svg.removeEventListener("touchcancel", handleTouchEnd);
+      window.removeEventListener("resize", handleResize);
+      if (input) {
+        input.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, [applyViewBox, zoomAtPoint]);
 
   return (
     <div
@@ -107,7 +398,8 @@ export default function TreeModule() {
         <button
           type="button"
           id="plus-zoom"
-          className="size-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-xl font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] transition-colors cursor-pointer"
+          onClick={handleZoomIn}
+          className="size-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-xl font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] active:scale-95 transition-all cursor-pointer select-none"
           title="Zoom In"
         >
           +
@@ -115,7 +407,8 @@ export default function TreeModule() {
         <button
           type="button"
           id="minus-zoom"
-          className="size-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-xl font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] transition-colors cursor-pointer"
+          onClick={handleZoomOut}
+          className="size-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-xl font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] active:scale-95 transition-all cursor-pointer select-none"
           title="Zoom Out"
         >
           -
@@ -153,7 +446,8 @@ export default function TreeModule() {
         <button
           type="button"
           id="helpButton"
-          className="size-10 min-w-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-[19px] font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] transition-colors cursor-pointer"
+          onClick={() => setIsHelpOpen((prev) => !prev)}
+          className="size-10 min-w-10 bg-[#1e2a1e] text-white font-['Cabinet_Grotesk',sans-serif] text-[19px] font-medium flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] active:scale-95 transition-all cursor-pointer"
           title="Help"
         >
           ?
@@ -163,14 +457,17 @@ export default function TreeModule() {
       {/* ── Help Box Modal ── */}
       <div
         id="help-box"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[90%] max-w-[480px] bg-white rounded-xl shadow-2xl p-6 border border-[#948e79]/30 font-['Cabinet_Grotesk',sans-serif]"
-        style={{ display: "none" }}
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[90%] max-w-[480px] bg-white rounded-xl shadow-2xl p-6 border border-[#948e79]/30 font-['Cabinet_Grotesk',sans-serif] ${
+          isHelpOpen ? "block" : "hidden"
+        }`}
+        style={{ display: isHelpOpen ? "block" : "none" }}
       >
         <div className="flex items-center justify-between pb-3 border-b border-[#e5dfcc]">
           <h2 className="text-2xl font-bold text-[#1e2a1e]">How to Use</h2>
           <button
             type="button"
             id="closeButton"
+            onClick={() => setIsHelpOpen(false)}
             className="text-xl text-[#948e79] hover:text-[#1e2a1e] font-bold px-2 py-1 cursor-pointer transition-colors"
           >
             ✕
@@ -215,10 +512,7 @@ export default function TreeModule() {
 
         <button
           type="button"
-          onClick={() => {
-            const hb = document.getElementById("help-box");
-            if (hb) hb.style.display = "none";
-          }}
+          onClick={() => setIsHelpOpen(false)}
           className="mt-6 w-full py-2.5 bg-[#1e2a1e] hover:bg-[#2e3e2e] text-white font-medium rounded-lg transition-colors cursor-pointer"
         >
           Close
@@ -227,8 +521,9 @@ export default function TreeModule() {
 
       {/* ── SVG Drawing Canvas ── */}
       <svg
+        ref={svgRef}
         id="svg-drawing"
-        className="w-full h-full bg-[#e5dfcc] cursor-grab active:cursor-grabbing block"
+        className="w-full h-full bg-[#e5dfcc] cursor-grab active:cursor-grabbing block touch-none select-none"
       >
         <defs id="defs">
           <filter id="shadow" width="125%" height="125%">
