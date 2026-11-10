@@ -12,20 +12,20 @@ export default function HomePage() {
     <>
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24">
-        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-accent">
+        <p className="mb-4 text-note text-orange">
           {/* PLACEHOLDER */}
           Santa Clara University
         </p>
 
         <h1
-          className="max-w-3xl font-semibold tracking-tight text-ink"
+          className="max-w-3xl font-display font-medium tracking-tight text-ink"
           style={{ fontSize: "var(--text-display)", lineHeight: 1.05 }}
         >
           {/* PLACEHOLDER */}
           Barkada of SCU&apos;s KAA
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-muted">
+        <p className="mt-6 max-w-2xl text-b1 leading-relaxed text-ink/80 font-sans">
           {/* PLACEHOLDER */}
           A short paragraph introducing the org goes here — who you are, what
           KAA stands for, and what the barkada is about.
@@ -35,13 +35,22 @@ export default function HomePage() {
           {/* Plain <a>: /tree needs a full page load so PyScript boots fresh */}
           <a
             href="/tree"
-            className="rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-hover"
+            className="flex items-center gap-[7px] bg-orange px-6 py-3 font-sans text-b2 font-medium text-white shadow-sm transition-all duration-150 hover:bg-green-dark"
           >
-            Explore the tree
+            <span>Explore the tree</span>
+            <div className="relative shrink-0 size-[20px]">
+              <img
+                src="/arrow-forward.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="block size-full"
+              />
+            </div>
           </a>
           <Link
             href="/about"
-            className="rounded-xl border border-border bg-surface px-6 py-3 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+            className="border border-mud bg-transparent px-6 py-3 font-sans text-b2 font-medium text-ink transition-all duration-150 hover:bg-green-dark hover:text-white hover:border-green-dark"
           >
             About us
           </Link>
@@ -49,7 +58,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Feature strip ───────────────────────────────────────────── */}
-      <section className="border-t border-border bg-surface">
+      <section className="border-t border-mud bg-surface/40">
         <div className="grid overflow-hidden sm:grid-cols-3">
           {[
             {
@@ -67,10 +76,10 @@ export default function HomePage() {
           ].map((card) => (
             <div
               key={card.title}
-              className="border-b border-border px-4 py-10 sm:border-b-0 sm:border-r sm:px-6 sm:last:border-r-0"
+              className="border-b border-mud px-4 py-10 sm:border-b-0 sm:border-r sm:px-6 sm:last:border-r-0"
             >
-              <h2 className="text-base font-semibold text-ink">{card.title}</h2>
-              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+              <h2 className="text-h4 text-ink">{card.title}</h2>
+              <p className="mt-3 text-b2 leading-relaxed text-ink/80">
                 {card.body}
               </p>
             </div>
@@ -81,21 +90,30 @@ export default function HomePage() {
       {/* ── Tree CTA ────────────────────────────────────────────────── */}
       <section className="px-4 py-20 text-center sm:px-6">
         <h2
-          className="font-semibold tracking-tight text-ink"
+          className="font-display font-medium tracking-tight text-ink"
           style={{ fontSize: "var(--text-heading)", lineHeight: 1.15 }}
         >
           {/* PLACEHOLDER */}
           See how everyone connects
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-ink-muted">
+        <p className="mx-auto mt-4 max-w-xl text-b1 text-ink/80">
           {/* PLACEHOLDER */}
           Search your name and follow the lines up and down the family tree.
         </p>
         <a
           href="/tree"
-          className="mt-8 inline-block rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+          className="mt-8 inline-flex items-center gap-[7px] bg-orange px-6 py-3 font-sans text-b2 font-medium text-white transition-all duration-150 hover:bg-green-dark"
         >
-          Open the tree
+          <span>Open the tree</span>
+          <div className="relative shrink-0 size-[20px]">
+            <img
+              src="/arrow-forward.svg"
+              alt=""
+              width={20}
+              height={20}
+              className="block size-full"
+            />
+          </div>
         </a>
       </section>
     </>
