@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — placeholders.
+ *
+ * Your style guide isn't in yet, so everything visual is driven from the
+ * custom properties below. Swapping in the real branding later should only
+ * touch this block (plus, eventually, the font declaration).
+ */
+:root {
+  /* --- Font --------------------------------------------------------------
+   * Neutral system stack: zero downloads, no layout shift, no webfont to
+   * remove later. Replace with the style guide font when it arrives —
+   * either point --font-sans at it, or swap this for a next/font call.
+   */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+
+  /* --- Palette ----------------------------------------------------------- */
+  /* Warm neutrals for surfaces */
+  --color-bg: #f7f6f3;
+  --color-surface: #ffffff;
+  --color-border: #e4e2dd;
+  --color-ink: #1c1b19;
+  --color-ink-muted: #6b6862;
+
+  /* Accent — borrowed from the tree module so the two halves agree.
+   * Root purple (#b869f0) leads, with the tree's orange/light-blue/red
+   * available as secondary accents.
+   */
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
+  --color-accent-soft: #f3edfe;
+
+  /* --- Type -------------------------------------------------------------- */
+  /* Fluid so the hero doesn't dominate a phone screen */
+  --text-display: clamp(2.25rem, 6vw, 3.5rem);
+  --text-heading: clamp(1.5rem, 3.5vw, 2rem);
+}
+
+@theme inline {
+  --font-sans: var(--font-sans);
+
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-soft: var(--color-accent-soft);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--color-accent-soft);
+}
+
+/* ── Legacy tree module ───────────────────────────────────────────────
+ * The markup on /tree is reproduced from index.html and driven by unmodified
+ * Python/JS, so it was written against browser defaults. Tailwind's
+ * preflight strips those defaults (button chrome, list markers, heading
+ * sizes), which would leave the help box unreadable and the zoom controls
+ * invisible. Restore just enough here.
+ *
+ * Additive only — tree.css is loaded separately and untouched. Because it is
+ * injected at runtime it lands *after* this file in document order, so any
+ * rule where we need to beat it on a shared property is prefixed with `body`
+ * to win on specificity rather than order.
+ */
+
+/* Help box: tree.css forces it open on load, but zoom.js toggles it with an
+ * inline style, so hiding it here is overridden by Help! and Close. */
+body #help-box {
+  display: none;
+  width: min(400px, 100%);
+  border-color: var(--color-border);
+  border-radius: 0.75rem;
+  font-family: var(--font-sans);
+}
+
+#help-box h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+}
+
+#help-box h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+#help-box p {
+  margin-top: 0.35rem;
+  line-height: 1.55;
+}
+
+#help-box ol {
+  list-style: decimal;
+  padding-left: 1.35rem;
+  margin-top: 0.5rem;
+}
+
+#help-box li {
+  margin-top: 0.3rem;
+  line-height: 1.5;
+}
+
+/* Buttons the Python module shows and hides by id */
+#helpButton,
+#testButton,
+#help-box button {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  padding: 0.4rem 0.85rem;
+}
+
+#helpButton:hover,
+#testButton:hover,
+#help-box button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Zoom controls sit on a dark chip — must stay light-on-dark */
+.zoom-button {
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  border: 0;
+  background-color: transparent;
+  color: #fff;
+}
+
+.zoom-button:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Name search field. tree.css pins it to 20px tall, which clips once real
+ * padding and a border are applied — hence the `body` prefix. */
+body #tree_name {
+  width: 100%;
+  height: auto;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: var(--color-surface);
+  padding: 0.45rem 0.6rem;
+}
+
+#tree_name:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* Autocomplete dropdown — tree.css gives items a fixed 165px width and a
+ * background matched to the old page, so stretch them to the field instead. */
+#autocomplete-box {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: var(--color-surface);
+  box-shadow: 0 8px 24px rgba(28, 27, 25, 0.12);
+}
+
+#autocomplete-box .autocomplete-item {
+  width: 100%;
+  height: auto;
+  min-height: 32px;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+#autocomplete-box .autocomplete-item:hover {
+  background-color: var(--color-accent-soft);
+}
+
+/* The legacy sheet gives #svg-drawing no dimensions, so it falls back to the
+ * default 300x150 replaced-element size and the tree renders in a postage
+ * stamp. Give the container a real viewport and let the sheet fill it —
+ * zoom.js reads clientWidth/clientHeight on every interaction, so it picks
+ * the correct size up automatically. */
+body #svg-container {
+  height: clamp(520px, 78vh, 920px);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: var(--color-surface);
+}
+
+/* tree.css paints the canvas bisque with a hard black rule; keep the new
+ * palette instead (the node colours read fine on white). */
+body #svg-drawing {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-surface);
+  border: 0;
+  cursor: grab;
+}
+
+#svg-drawing:active {
+  cursor: grabbing;
+}
+
+/* tree.css centres this with a hardcoded offset sized for the old string */
+body #load-screen {
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-sans);
+  color: var(--color-ink-muted);
+}

@@ -1,4 +1,57 @@
 # Barkada of SCU's Official KAA Website
+
+## Frontend (Next.js)
+
+Three pages, built with Next.js (App Router, TypeScript) and Tailwind CSS:
+
+| Route | File | Notes |
+| --- | --- | --- |
+| `/` | `app/page.tsx` | Home — placeholder copy, swap in the real text |
+| `/about` | `app/about/page.tsx` | Under construction |
+| `/tree` | `app/tree/page.tsx` | Hosts the interactive tree module |
+
+Deployed on Vercel; it auto-detects Next.js, so no `vercel.json` is needed.
+
+### The tree module
+
+The Python/JS/CSS that draws the tree is **legacy code and is not modified**.
+It reaches into the DOM by fixed id, so `components/tree/tree-module.tsx`
+reproduces `index.html`'s markup exactly and then loads the runtime around it,
+in the original document order:
+
+1. `<mpy-config>` + `<script type="mpy">`
+2. `zoom.js`
+3. PyScript `core.js`
+
+**Copies, not moves.** The originals stay at the repo root untouched; identical
+copies live in `public/tree/` because that is what Next.js serves over HTTP.
+If the backend is ever edited, re-copy it:
+
+```sh
+cp app.py treeclass.py draw.py animation.py svgnodes.py zoom.js tree.css pyscript.json public/tree/
+```
+
+The `files` config uses absolute `/tree/…` paths — `/tree` has no trailing
+slash, so a relative `app.py` would resolve to `/app.py` and 404.
+
+### Navigation
+
+Links **to** and **from** `/tree` are plain `<a>` tags, not `next/link`. PyScript
+registers window-level listeners and mutates the document directly; a soft
+navigation would leave that runtime alive in the same document. Home ↔ About
+still navigates client-side as normal.
+
+### Styling
+
+All colours and the font stack are custom properties at the top of
+`app/globals.css`. A style guide hasn't landed yet, so everything is a
+placeholder — rebranding should mostly mean editing that block.
+
+Tailwind's preflight strips the browser defaults the legacy tree markup
+relies on (button chrome, list markers, heading sizes). Those are restored in
+the "Legacy tree module" section of the same file. That CSS is additive only:
+`public/tree/tree.css` is loaded separately and untouched.
+
 ## Back-end architecture
 - Our Cloud Run image runs using Flask and gunicorn.
 - Using Docker, it creates an image that Cloud Run uses to respond to HTTP requests.
