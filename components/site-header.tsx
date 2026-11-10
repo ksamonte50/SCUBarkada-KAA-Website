@@ -3,12 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/tree", label: "Tree" },
-] as const;
-
 export default function SiteHeader() {
   const pathname = usePathname();
 
@@ -24,52 +18,78 @@ export default function SiteHeader() {
    */
   const hardNav = (href: string) => pathname === "/tree" || href === "/tree";
 
+  const isHomeActive = pathname === "/";
+  const isAboutActive = pathname.startsWith("/about");
+  const isTreeActive = pathname.startsWith("/tree");
+
+  const leftNavItems = [
+    { href: "/", label: "Home", isActive: isHomeActive },
+    { href: "/about", label: "About", isActive: isAboutActive },
+  ] as const;
+
+  const treeHref = "/tree";
+  const baseTreeClass =
+    "flex items-center justify-center gap-[7px] px-[16px] py-[8px] font-sans text-b1 font-medium leading-normal whitespace-nowrap text-center text-white transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70";
+  const treeStateClass = isTreeActive
+    ? "bg-green-dark drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]"
+    : "bg-orange hover:bg-green-dark hover:drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]";
+  const combinedTreeClass = `${baseTreeClass} ${treeStateClass}`;
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-sm">
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-        <Link
-          href="/"
-          className="flex items-center gap-3 font-semibold tracking-tight text-ink"
-        >
-          {/* Placeholder mark — swap public/logo.svg for the real asset */}
-          <img
-            src="/logo.svg"
-            alt=""
-            width={36}
-            height={36}
-            className="size-9 rounded-lg"
-          />
-          <span className="text-sm sm:text-base">
-            Barkada of SCU
-            <span className="block text-xs font-normal text-ink-muted">
-              KAA
-            </span>
-          </span>
-        </Link>
+    <header className="sticky top-0 z-40 flex w-full justify-center px-4 pt-4 pb-2 pointer-events-none">
+      <nav
+        aria-label="Main"
+        className="pointer-events-auto relative flex h-[64px] w-full max-w-[512px] items-center justify-between bg-green px-[16px] drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]"
+      >
+        <div className="flex items-center gap-[16px] shrink-0">
+          {leftNavItems.map((item) => {
+            const baseClass =
+              "flex items-center justify-center px-[16px] py-[8px] font-sans text-b1 font-medium leading-normal whitespace-nowrap text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70";
+            const stateClass = item.isActive
+              ? "bg-green-dark text-white drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]"
+              : "text-beige hover:bg-green-dark hover:text-white hover:drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]";
+            const combinedClass = `${baseClass} ${stateClass}`;
 
-        <nav aria-label="Main">
-          <ul className="flex items-center gap-1 sm:gap-2">
-            {NAV.map((item) => {
-              const className =
-                "rounded-lg px-3 py-2 text-sm font-medium text-ink-muted transition-colors hover:bg-accent-soft hover:text-ink";
+            return hardNav(item.href) ? (
+              <a key={item.href} href={item.href} className={combinedClass}>
+                {item.label}
+              </a>
+            ) : (
+              <Link key={item.href} href={item.href} className={combinedClass}>
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
 
-              return (
-                <li key={item.href}>
-                  {hardNav(item.href) ? (
-                    <a href={item.href} className={className}>
-                      {item.label}
-                    </a>
-                  ) : (
-                    <Link href={item.href} className={className}>
-                      {item.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      </div>
+        {hardNav(treeHref) ? (
+          <a href={treeHref} className={combinedTreeClass}>
+            <span>Tree</span>
+            <div className="relative shrink-0 size-[20px]">
+              <img
+                src="/arrow-forward.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="block size-full"
+              />
+            </div>
+          </a>
+        ) : (
+          <Link href={treeHref} className={combinedTreeClass}>
+            <span>Tree</span>
+            <div className="relative shrink-0 size-[20px]">
+              <img
+                src="/arrow-forward.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="block size-full"
+              />
+            </div>
+          </Link>
+        )}
+      </nav>
     </header>
   );
 }
