@@ -418,7 +418,7 @@ export default function TreeModule() {
       {/* ── Search & Help Controls (Figma bottom center) ── */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
         {/* Search bar container */}
-        <div id="autocomplete-container" className="relative w-[256px]">
+        <div id="autocomplete-container" className="relative w-[256px] h-10 !pb-0 flex items-center">
           <div className="w-[256px] h-10 bg-white shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] flex items-center px-2.5 gap-2.5">
             <img
               src="/icons/search.svg"
@@ -437,9 +437,21 @@ export default function TreeModule() {
           </div>
         </div>
 
-        {/* Hidden button triggered to build the tree */}
-        <button type="button" id="testButton" style={{ display: "none" }}>
-          Click!
+        {/* Submit button to build the tree */}
+        <button
+          type="button"
+          id="testButton"
+          className="size-10 min-w-10 bg-[#1e2a1e] text-white flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] active:scale-95 transition-all cursor-pointer"
+          title="Search tree"
+          aria-label="Build tree"
+        >
+          <img
+            src="/arrow-forward.svg"
+            alt=""
+            width={20}
+            height={20}
+            className="size-5 shrink-0 block"
+          />
         </button>
 
         {/* Help button */}

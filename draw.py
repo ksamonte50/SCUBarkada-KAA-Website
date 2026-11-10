@@ -340,7 +340,7 @@ def draw_full_tree(tree, person):
 
 	# Draw littles and place root in middle of subtree.
 	starting_x = tree[person]["x"] 
-	ending_x = draw_tree_down(tree, person, color="red")
+	ending_x = draw_tree_down(tree, person, color=DEFAULT_COLOR)
 	total_offset = ending_x - starting_x
 	# print(f"total_offset: {total_offset}")
 	# tree[person]["x"] = (ending_x + starting_x) / 2 

@@ -1,6 +1,6 @@
 # This has the logic for animating the nodes when hovered over.
 
-from svgnodes import NODE_HEIGHT, NODE_WIDTH, STROKE_WIDTH
+from svgnodes import NODE_HEIGHT, NODE_WIDTH, STROKE_WIDTH, REAL_LINE_CONNECT_COLOR
 from draw import main_root, MAX_QUEUE_SIZE, GHOST_RECT_OPACITY
 from collections import deque
 from pyscript import document
@@ -13,7 +13,6 @@ from pyscript import document
 
 # Constants
 MAX_QUEUE_SIZE = 100
-REAL_LINE_CONNECT_COLOR = "red"
 ANIMATED_GHOST_RECT_OPACITY = 0.9
 
 # Global variables to be used for animations.

@@ -255,6 +255,12 @@ body #tree_name:focus {
   outline: none;
 }
 
+body #autocomplete-container {
+  width: 256px;
+  height: 40px;
+  padding-bottom: 0;
+}
+
 /* Autocomplete dropdown */
 #autocomplete-box {
   position: absolute;

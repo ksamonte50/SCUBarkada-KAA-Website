@@ -9,45 +9,11 @@ export const metadata: Metadata = {
 
 export default function TreePage() {
   return (
-    <div className="relative flex flex-col h-screen w-screen overflow-hidden bg-[#948e79] font-['Cabinet_Grotesk',sans-serif]">
-      {/* ── Top Floating Nav Bar v3 (Matches Figma node 133:374) ── */}
-      <header className="pt-4 px-4 shrink-0 flex justify-center z-20">
-        <nav
-          aria-label="Main"
-          className="w-full max-w-[620px] h-[64px] bg-[#3a523a] shadow-[0px_2px_4px_rgba(0,0,0,0.15)] flex items-center justify-between px-5 py-3"
-        >
-          <div className="flex items-center gap-4">
-            <a
-              href="/"
-              className="px-4 py-2 font-['Cabinet_Grotesk',sans-serif] text-[19px] font-medium text-[#e5dfcc] hover:text-white transition-colors"
-            >
-              Home
-            </a>
-            <a
-              href="/about"
-              className="px-4 py-2 font-['Cabinet_Grotesk',sans-serif] text-[19px] font-medium text-[#e5dfcc] hover:text-white transition-colors"
-            >
-              About
-            </a>
-          </div>
-
-          <div className="bg-[#a2591f] flex items-center gap-[7px] px-4 py-2 font-['Cabinet_Grotesk',sans-serif] text-[19px] font-medium text-white shadow-sm select-none">
-            <span>Tree</span>
-            <img
-              src="/icons/arrow-forward.svg"
-              alt=""
-              width={20}
-              height={20}
-              className="size-5 shrink-0"
-            />
-          </div>
-        </nav>
-      </header>
-
+    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-[#948e79] font-['Cabinet_Grotesk',sans-serif]">
       {/* ── Main Tree Container (Matches Figma node 272:31) ── */}
-      <main className="flex-1 w-full p-4 sm:p-7 pt-3 pb-6 overflow-hidden flex flex-col">
+      <div className="flex-1 w-full p-4 sm:p-7 pt-[88px] sm:pt-[92px] pb-6 overflow-hidden flex flex-col">
         <TreeModule />
-      </main>
+      </div>
     </div>
   );
 }

@@ -6,10 +6,6 @@ import { usePathname } from "next/navigation";
 export default function SiteHeader() {
   const pathname = usePathname();
 
-  if (pathname === "/tree") {
-    return null;
-  }
-
   /*
    * The Tree page hosts a PyScript interpreter that mutates the document
    * directly and registers window-level listeners. A soft navigation away
@@ -42,7 +38,7 @@ export default function SiteHeader() {
   return (
     <header
       className={`${
-        isHomeActive ? "absolute" : "sticky"
+        isHomeActive || isTreeActive ? "absolute" : "sticky"
       } top-0 left-0 right-0 z-40 flex w-full justify-center px-4 pt-4 pb-2 pointer-events-none`}
     >
       <nav

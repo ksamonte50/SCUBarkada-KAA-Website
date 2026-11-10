@@ -52,7 +52,7 @@ async def main():
 	print("hi")
 	await getAPIData()
 	document.getElementById("load-screen").style.display = "none"
-	document.getElementById("testButton").style.display = "inline"
+	document.getElementById("testButton").style.display = "flex"
 	input_field = document.getElementById("tree_name")
 	print("before")
 	set_autocomplete(input_field)
