@@ -36,18 +36,25 @@ export default function SiteHeader() {
   const combinedTreeClass = `${baseTreeClass} ${treeStateClass}`;
 
   return (
-    <header className="sticky top-0 z-40 flex w-full justify-center px-4 pt-4 pb-2 pointer-events-none">
+    <header
+      className={`${
+        isHomeActive ? "absolute" : "sticky"
+      } top-0 left-0 right-0 z-40 flex w-full justify-center px-4 pt-4 pb-2 pointer-events-none`}
+    >
       <nav
         aria-label="Main"
-        className="pointer-events-auto relative flex h-[64px] w-full max-w-[512px] items-center justify-between bg-green px-[16px] drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]"
+        className="pointer-events-auto relative flex h-[64px] w-full max-w-[620px] items-center justify-between bg-[rgba(58,82,58,0.6)] backdrop-blur-md px-[20px] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)]"
       >
         <div className="flex items-center gap-[16px] shrink-0">
           {leftNavItems.map((item) => {
             const baseClass =
               "flex items-center justify-center px-[16px] py-[8px] font-sans text-b1 font-medium leading-normal whitespace-nowrap text-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70";
-            const stateClass = item.isActive
-              ? "bg-green-dark text-white drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]"
-              : "text-beige hover:bg-green-dark hover:text-white hover:drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]";
+            const stateClass =
+              item.isActive && !isHomeActive
+                ? "bg-green-dark text-white drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]"
+                : item.isActive
+                ? "text-white"
+                : "text-beige hover:bg-green-dark hover:text-white hover:drop-shadow-[0px_2px_4px_rgba(0,0,0,0.15)]";
             const combinedClass = `${baseClass} ${stateClass}`;
 
             return hardNav(item.href) ? (
