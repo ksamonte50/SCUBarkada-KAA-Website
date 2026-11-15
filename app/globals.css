@@ -327,3 +327,48 @@ body #load-screen {
   font-family: var(--font-cabinet);
   color: #1e2a1e;
 }
+
+@keyframes splashFadeOut {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  73% {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  99.9% {
+    opacity: 0;
+    visibility: visible;
+    pointer-events: none;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+@keyframes splashScaleDown {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  73% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}
+
+.splash-overlay {
+  animation: splashFadeOut 0.95s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+}
+
+.splash-content {
+  animation: splashScaleDown 0.95s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+}
