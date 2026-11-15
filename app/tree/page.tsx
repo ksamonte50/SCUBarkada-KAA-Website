@@ -9,9 +9,12 @@ export const metadata: Metadata = {
 
 export default function TreePage() {
   return (
-    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-[#948e79] font-['Cabinet_Grotesk',sans-serif]">
+    <div
+      className="relative flex flex-col h-screen h-[100dvh] w-full overflow-hidden bg-[#948e79] font-['Cabinet_Grotesk',sans-serif]"
+      style={{ height: "100dvh" }}
+    >
       {/* ── Main Tree Container (Matches Figma node 272:31) ── */}
-      <div className="flex-1 w-full p-4 sm:p-7 pt-[88px] sm:pt-[92px] pb-6 overflow-hidden flex flex-col">
+      <div className="flex-1 w-full p-4 sm:p-6 md:p-7 pt-[88px] sm:pt-[92px] pb-12 sm:pb-8 md:pb-6 overflow-hidden flex flex-col">
         <TreeModule />
       </div>
     </div>

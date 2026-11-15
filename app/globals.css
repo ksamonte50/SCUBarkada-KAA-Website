@@ -233,6 +233,7 @@ h4, h5, h6 {
 
 /* Help box */
 body #help-box {
+  display: block !important;
   width: min(480px, 92vw);
   border-radius: 0.75rem;
   font-family: var(--font-cabinet);
@@ -256,7 +257,7 @@ body #tree_name:focus {
 }
 
 body #autocomplete-container {
-  width: 256px;
+  width: min(256px, calc(100vw - 148px));
   height: 40px;
   padding-bottom: 0;
 }
@@ -266,7 +267,7 @@ body #autocomplete-container {
   position: absolute;
   bottom: 46px;
   left: 0;
-  width: 256px;
+  width: min(256px, calc(100vw - 148px));
   max-height: 220px;
   overflow-y: auto;
   border: 1px solid rgba(0, 0, 0, 0.1);

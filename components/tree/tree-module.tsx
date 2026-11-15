@@ -77,7 +77,7 @@ interface ViewBox {
 
 export default function TreeModule() {
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(true);
 
   const viewBoxRef = useRef<ViewBox>({ x: -400, y: -300, width: 800, height: 600 });
   const isPanningRef = useRef(false);
@@ -393,7 +393,7 @@ export default function TreeModule() {
       {/* ── Zoom Controls (Figma buttons top right) ── */}
       <div
         id="zoom-box-new"
-        className="absolute top-5 right-5 z-10 flex items-center gap-2.5"
+        className="absolute top-3.5 right-3.5 sm:top-5 sm:right-5 z-10 flex items-center gap-2 sm:gap-2.5"
       >
         <button
           type="button"
@@ -416,7 +416,7 @@ export default function TreeModule() {
       </div>
 
       {/* ── Search & Help Controls (Figma bottom center) ── */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
+      <div className="absolute bottom-3.5 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 sm:gap-3">
         {/* Search bar container */}
         <div id="autocomplete-container" className="relative w-[256px] h-10 !pb-0 flex items-center">
           <div className="w-[256px] h-10 bg-white shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] flex items-center px-2.5 gap-2.5">
@@ -466,13 +466,23 @@ export default function TreeModule() {
         </button>
       </div>
 
-      {/* ── Help Box Modal ── */}
+      {/* ── Help Box Modal & Backdrop ── */}
+      <div
+        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-[1px] transition-opacity duration-200 ease-out ${
+          isHelpOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsHelpOpen(false)}
+        aria-hidden="true"
+      />
       <div
         id="help-box"
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[90%] max-w-[480px] bg-white rounded-xl shadow-2xl p-6 border border-[#948e79]/30 font-['Cabinet_Grotesk',sans-serif] ${
-          isHelpOpen ? "block" : "hidden"
+        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-[480px] bg-white rounded-xl shadow-2xl p-6 border border-[#948e79]/30 font-['Cabinet_Grotesk',sans-serif] transition-all duration-200 ease-out ${
+          isHelpOpen
+            ? "opacity-100 scale-100 pointer-events-auto"
+            : "opacity-0 scale-95 pointer-events-none"
         }`}
-        style={{ display: isHelpOpen ? "block" : "none" }}
       >
         <div className="flex items-center justify-between pb-3 border-b border-[#e5dfcc]">
           <h2 className="text-2xl font-bold text-[#1e2a1e]">How to Use</h2>
