@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   },
   description:
     "The official site of Barkada of Santa Clara University's KAA, including the interactive big/little family tree.",
+  icons: {
+    icon: "/philippines-sun.svg",
+    shortcut: "/philippines-sun.svg",
+    apple: "/philippines-sun.svg",
+  },
 };
 
 export default function RootLayout({

@@ -108,6 +108,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  cursor: url('/sun-cursor-default.svg') 14 14, auto;
 }
 
 body {
@@ -118,6 +119,19 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: url('/sun-cursor-default.svg') 14 14, auto;
+}
+
+/* Custom interactive pointer cursor */
+a,
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+select,
+summary {
+  cursor: url('/sun-cursor-pointer.svg') 14 14, pointer;
 }
 
 /* Style Guide Typography Utility Classes */
