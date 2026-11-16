@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "KAAnect | Barkada of SCU",
+  title: "Barkada KAAnect",
   description:
     "Barkada presents KAAnect — Santa Clara University's KAA family tree.",
 };

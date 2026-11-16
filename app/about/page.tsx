@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About | Barkada KAAnect",
   description: "About Barkada of SCU's KAA — coming soon.",
 };
 

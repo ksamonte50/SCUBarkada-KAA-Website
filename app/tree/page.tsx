@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import TreeModule from "@/components/tree/tree-module";
 
 export const metadata: Metadata = {
-  title: "Tree",
+  title: "Tree | Barkada KAAnect",
   description:
     "Explore the Barkada of SCU KAA big/little family tree.",
 };
