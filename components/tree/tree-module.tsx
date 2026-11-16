@@ -385,9 +385,30 @@ export default function TreeModule() {
       {/* ── Loading Screen ── */}
       <div
         id="load-screen"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 font-['Cabinet_Grotesk',sans-serif] text-2xl font-medium text-[#1e2a1e] tracking-wide pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 font-['Cabinet_Grotesk',sans-serif] text-2xl font-medium text-[#1e2a1e] tracking-wide pointer-events-none flex flex-col items-center justify-center gap-3"
       >
-        Loading...
+        <span>Loading...</span>
+        <svg
+          className="animate-spin tree-loading-spinner size-7 text-[#1e2a1e]"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="3.5"
+          />
+          <path
+            className="opacity-80"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
       </div>
 
       {/* ── Zoom Controls (Figma buttons top right) ── */}
@@ -437,22 +458,14 @@ export default function TreeModule() {
           </div>
         </div>
 
-        {/* Submit button to build the tree */}
+        {/* Hidden button to preserve PyScript / Enter key hook compatibility without rendering the arrow button */}
         <button
           type="button"
           id="testButton"
-          className="size-10 min-w-10 bg-[#1e2a1e] text-white flex items-center justify-center shadow-[0px_2px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#2e3e2e] active:scale-95 transition-all cursor-pointer"
-          title="Search tree"
-          aria-label="Build tree"
-        >
-          <img
-            src="/arrow-forward.svg"
-            alt=""
-            width={20}
-            height={20}
-            className="size-5 shrink-0 block"
-          />
-        </button>
+          className="hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+        />
 
         {/* Help button */}
         <button
