@@ -34,6 +34,7 @@ export default function SplashScreen() {
             src="/barkada-logo.png"
             alt="Barkada Logo"
             fill
+            sizes="(max-width: 640px) 144px, (max-width: 768px) 192px, 224px"
             priority
             className="object-contain"
           />
