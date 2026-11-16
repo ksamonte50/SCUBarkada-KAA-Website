@@ -9,16 +9,16 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-4 py-24 select-none sm:px-6">
+    <section className="relative flex h-screen h-[100dvh] w-full flex-col items-center justify-center overflow-hidden bg-black px-4 py-24 select-none sm:px-6">
       {/* Background leaves with black base */}
-      <div className="pointer-events-none absolute inset-0 z-0">
+      <div className="pointer-events-none absolute inset-0 z-0 h-full w-full">
         <Image
-          src="/hero-leaves.png"
+          src="/hero-leaves.jpg"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-55"
+          className="h-full w-full object-cover object-center opacity-55"
         />
       </div>
 
